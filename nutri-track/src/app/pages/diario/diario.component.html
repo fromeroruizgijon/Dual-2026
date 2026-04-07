@@ -1,0 +1,59 @@
+<div class="container mt-4">
+  <h2 class="mb-4">📝 Mi Diario de Hoy</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card bg-success text-white shadow-sm">
+        <div class="card-body text-center">
+          <h6>Calorías Totales</h6>
+          <h3 class="fw-bold">{{ totales.calorias | number:'1.0-0' }} kcal</h3>
+        </div>
+      </div>
+    </div>
+    </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Calorías</th>
+            <th>Proteínas</th>
+            <th>Grasas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reg of registros; let i = index">
+            <td>
+              <div class="d-flex align-items-center">
+                <img [src]="reg.imagen" class="rounded me-2" style="width: 40px; height: 40px; object-fit: contain;">
+                <div>
+                  <span class="d-block fw-bold">{{ reg.nombre }}</span>
+                  <small class="text-muted">{{ reg.marca }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ reg.cantidadSeleccionada }}g</td>
+            <td class="fw-bold text-success">{{ (reg.calorias * reg.cantidadSeleccionada / 100) | number:'1.0-0' }} kcal</td>
+            <td>{{ (reg.proteinas * reg.cantidadSeleccionada / 100) | number:'1.1-1' }}g</td>
+            <td>{{ (reg.grasas * reg.cantidadSeleccionada / 100) | number:'1.1-1' }}g</td>
+            <td>
+              <button class="btn btn-outline-danger btn-sm" (click)="borrarRegistro(i)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          
+          <tr *ngIf="registros.length === 0">
+            <td colspan="6" class="text-center py-4 text-muted">
+              Aún no has añadido alimentos hoy. ¡Usa el buscador!
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

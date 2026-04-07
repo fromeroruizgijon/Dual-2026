@@ -1,0 +1,138 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="text-center mb-4">Encuentra tu alimento 🍎</h2>
+      
+      <div class="input-group mb-3 shadow-sm">
+        <input type="text" class="form-control form-control-lg" 
+               placeholder="Ej: Leche, Galletas, Quinoa..." 
+               [(ngModel)]="termino"
+               (keyup.enter)="buscar()">
+        
+        <button class="btn btn-success px-4" type="button" (click)="buscar()">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+
+      <div *ngIf="cargando" class="text-center my-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+
+      <div *ngIf="resultados.length === 0 && !cargando" class="text-center text-muted">
+        <p>Introduce un nombre para consultar datos nutricionales reales.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row row-cols-1 row-cols-md-3 g-4 mt-4" *ngIf="resultados.length > 0">
+  
+  <div class="col" *ngFor="let alimento of resultados">
+    <div class="card h-100 shadow-sm border-0">
+      
+      <div class="text-center p-3">
+        <img [src]="alimento.imagen" 
+             class="card-img-top img-fluid" 
+             alt="Imagen de {{alimento.nombre}}"
+             style="max-height: 180px; width: auto; object-fit: contain;">
+      </div>
+
+      <div class="card-body d-flex flex-column">
+        <h5 class="card-title text-truncate">{{ alimento.nombre }}</h5>
+        <p class="card-text text-muted small">{{ alimento.marca }}</p>
+        
+        <div class="d-flex justify-content-between align-items-center mt-auto">
+          <span class="badge rounded-pill bg-light text-dark border">
+            🔥 {{ alimento.calorias }} kcal
+          </span>
+          
+          <span class="badge rounded-pill" [ngClass]="{
+            'bg-success': alimento.nutriscore === 'a' || alimento.nutriscore === 'b',
+            'bg-warning text-dark': alimento.nutriscore === 'c',
+            'bg-danger': alimento.nutriscore === 'd' || alimento.nutriscore === 'e',
+            'bg-secondary': !alimento.nutriscore
+          }">
+            Score: {{ (alimento.nutriscore || 'N/A') | uppercase }}
+          </span>
+        </div>
+
+        <button class="btn btn-outline-success btn-sm mt-3 w-100" (click)="verDetalles(alimento)">
+            Ver detalles / Añadir
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="resultados.length === 0 && !cargando && termino.length > 0" class="alert alert-info mt-4 text-center">
+  No se han encontrado productos con "{{ termino }}".
+</div>
+<div class="modal fade" [ngClass]="{'show d-block': alimentoSeleccionado}" 
+     tabindex="-1" *ngIf="alimentoSeleccionado" 
+     style="background-color: rgba(0,0,0,0.5);">
+  
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">{{ alimentoSeleccionado.nombre }}</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="alimentoSeleccionado = null"></button>
+      </div>
+
+      <div class="modal-body text-center">
+        <img [src]="alimentoSeleccionado.imagen" class="img-fluid mb-3" style="max-height: 200px;">
+        
+        <h6 class="text-muted mb-4">{{ alimentoSeleccionado.marca }}</h6>
+
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="d-block text-uppercase fw-bold text-muted">Proteínas</small>
+              <span class="h5">{{ alimentoSeleccionado.proteinas }}g</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="d-block text-uppercase fw-bold text-muted">Carbohidratos</small>
+              <span class="h5">{{ alimentoSeleccionado.carbohidratos }}g</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="d-block text-uppercase fw-bold text-muted">Grasas</small>
+              <span class="h5">{{ alimentoSeleccionado.grasas }}g</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-2 border rounded bg-light text-success">
+              <small class="d-block text-uppercase fw-bold text-muted">Calorías</small>
+              <span class="h5">{{ alimentoSeleccionado.calorias }} kcal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 p-3 bg-light rounded border">
+        <label class="form-label fw-bold">¿Qué cantidad has comido? (en gramos/ml)</label>
+        <div class="input-group">
+            <input type="number" class="form-control" [(ngModel)]="alimentoSeleccionado.cantidadSeleccionada" placeholder="Ej: 100">
+            <span class="input-group-text">g / ml</span>
+        </div>
+        <small class="text-muted d-block mt-2">
+            Total calorías: 
+            <span class="fw-bold text-success">
+            {{ (alimentoSeleccionado.calorias * (alimentoSeleccionado.cantidadSeleccionada || 0) / 100) | number:'1.0-0' }} kcal
+            </span>
+        </small>
+        </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary" (click)="alimentoSeleccionado = null">Cerrar</button>
+        <button type="button" class="btn btn-success" (click)="aniadirAlDiario()">
+            Añadir al Diario
+        </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
