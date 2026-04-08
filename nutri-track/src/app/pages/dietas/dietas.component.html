@@ -1,1 +1,27 @@
-<p>dietas works!</p>
+<div class="container mt-4">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Preferencias de Dieta 🥦</h2>
+    <p class="text-muted">Selecciona tu perfil para que el buscador te avise de ingredientes no aptos.</p>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center max-w-75 mx-auto">
+    
+    <div class="col" *ngFor="let dieta of opcionesDietas">
+      <div class="card h-100 shadow-sm text-center" 
+           style="cursor: pointer; transition: all 0.3s ease;"
+           [ngClass]="{'border-success bg-success text-white': dietaActual === dieta.id, 'border-0': dietaActual !== dieta.id}"
+           (click)="seleccionarDieta(dieta.id)">
+        
+        <div class="card-body p-4">
+          <div class="display-4 mb-3">{{ dieta.icono }}</div>
+          <h4 class="card-title fw-bold">{{ dieta.titulo }}</h4>
+          <p class="card-text opacity-75">{{ dieta.desc }}</p>
+          
+          <i class="bi bi-check-circle-fill fs-2" *ngIf="dietaActual === dieta.id"></i>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

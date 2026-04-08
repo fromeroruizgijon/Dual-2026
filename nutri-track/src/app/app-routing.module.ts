@@ -4,13 +4,15 @@ import { BuscadorComponent } from './components/buscador/buscador.component';
 import { DietasComponent } from './pages/dietas/dietas.component';
 import { DiarioComponent } from './pages/diario/diario.component';
 import { StatsComponent } from './pages/stats/stats.component';
+import { HomeComponent } from './pages/home/home.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: '/buscar', pathMatch: 'full' },
+  { path: '', component: HomeComponent },
   { path: 'buscar', component: BuscadorComponent },
-  { path: 'dietas', component: DietasComponent },
+  { path: 'stats', component: StatsComponent },
   { path: 'diario', component: DiarioComponent },
-  { path: 'stats', component: StatsComponent }
+  { path: 'dietas', component: DietasComponent },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({

@@ -13,6 +13,8 @@ import { StatsComponent } from './pages/stats/stats.component';
 import { FormsModule } from '@angular/forms';
 import { DetalleAlimentoComponent } from './components/detalle-alimento/detalle-alimento.component';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { HomeComponent } from './pages/home/home.component';
+import { FooterComponent } from './components/footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
     DietasComponent,
     DiarioComponent,
     StatsComponent,
-    DetalleAlimentoComponent
+    DetalleAlimentoComponent,
+    HomeComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,

@@ -35,4 +35,15 @@ export class DiarioComponent {
     localStorage.setItem('diario', JSON.stringify(this.registros));
     this.calcularTotales();
   }
+  // Variable para guardar el alimento que vamos a mostrar en el modal
+  alimentoDetalle: any = null;
+
+  // Función que se ejecuta al hacer clic en un alimento del diario
+  verIngredientes(alimento: any) {
+    this.alimentoDetalle = alimento;
+  }
+
+  cerrarModal() {
+    this.alimentoDetalle = null;
+  }
 }

@@ -9,4 +9,6 @@ export interface Alimento {
     proteinas: number;
     grasas: number;
     cantidadSeleccionada?: number; // Para cuando el usuario anote cuánto ha comido
+    ingredientesTags?: string[];
+    alergenosTags?: string[];
 }
