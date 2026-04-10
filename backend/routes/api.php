@@ -3,12 +3,24 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\DiarioController;
+use App\Http\Controllers\Api\AuthController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-// Ruta para guardar un alimento
-Route::post('/diario', [DiarioController::class, 'store']);
+// --- RUTAS PÚBLICAS ---
+// Cualquiera puede registrarse o loguearse
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-// Ruta para obtener el diario de un día específico
-Route::get('/diario/{fecha}', [DiarioController::class, 'getPorFecha']);
+
+// --- RUTAS PROTEGIDAS (Necesitan Token) ---
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Ruta para ver los datos del usuario logueado
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    // Rutas del Diario (Solo el dueño del token puede usarlas)
+    Route::post('/diario', [DiarioController::class, 'store']);
+    Route::get('/diario/{fecha}', [DiarioController::class, 'getPorFecha']);
+    
+});

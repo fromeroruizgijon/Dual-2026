@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { BuscadorComponent } from './components/buscador/buscador.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { DietasComponent } from './pages/dietas/dietas.component';
@@ -16,6 +16,10 @@ import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2
 import { HomeComponent } from './pages/home/home.component';
 import { FooterComponent } from './components/footer/footer.component';
 
+import { authInterceptor } from './interceptors/auth.interceptor';
+import { LoginComponent } from './pages/login/login.component';
+import { RegistroComponent } from './pages/registro/registro.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,16 +30,19 @@ import { FooterComponent } from './components/footer/footer.component';
     StatsComponent,
     DetalleAlimentoComponent,
     HomeComponent,
-    FooterComponent
+    FooterComponent,
+    LoginComponent,
+    RegistroComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    BaseChartDirective
+    BaseChartDirective,
+    FormsModule
   ],
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideCharts(withDefaultRegisterables())
   ],
   bootstrap: [AppComponent]

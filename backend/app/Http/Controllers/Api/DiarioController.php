@@ -9,32 +9,22 @@ class DiarioController extends \App\Http\Controllers\Controller
      */
     public function store(\Illuminate\Http\Request $request)
     {
-        // 1. Validamos que los datos que vienen de Angular sean correctos
         $validated = $request->validate([
-            'alimento_id'     => 'required|string',
-            'nombre'          => 'required|string',
-            'marca'           => 'nullable|string',
-            'imagen'          => 'nullable|string',
-            'cantidad'        => 'required|numeric',
-            'calorias'        => 'required|numeric',
-            'proteinas'       => 'required|numeric',
-            'carbohidratos'   => 'required|numeric',
-            'grasas'          => 'required|numeric',
-            'tipo_comida'     => 'required|string',
-            'fecha'           => 'required|date',
+            'nombre' => 'required|string',
+            'marca' => 'nullable|string',
+            'calorias' => 'required|numeric',
+            'proteinas' => 'required|numeric',
+            'carbohidratos' => 'required|numeric',
+            'grasas' => 'required|numeric',
+            'cantidadSeleccionada' => 'required|numeric',
+            'imagen' => 'nullable|string',
         ]);
 
-        // 2. Por ahora, como no tenemos login aún, usaremos el usuario 1 por defecto
-        // (Asegúrate de tener al menos un usuario en la tabla 'users')
-        $validated['user_id'] = 1;
+        // YA NO USAMOS EL 1 FIJO. Laravel detecta al usuario por el token:
+        $validated['user_id'] = $request->user()->id; 
 
-        // 3. Creamos el registro en la base de datos
         $registro = \App\Models\Diario::create($validated);
-
-        return response()->json([
-            'message' => 'Alimento registrado correctamente',
-            'data' => $registro
-        ], 201);
+        return response()->json($registro, 201);
     }
 
     /**

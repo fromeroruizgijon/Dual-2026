@@ -15,7 +15,7 @@ export class ComidaService {
 
   // Función para buscar alimentos por nombre (TEXTO LIBRE)
   buscarAlimentos(termino: string): Observable<Alimento[]> {
-    const url = `${this.apiUrl}?search_terms=${termino}&search_simple=1&action=process&json=1&page_size=20`;
+    const url = `${this.apiUrl}?search_terms=${termino}&search_simple=1&action=process&json=1&page_size=15`;
     
     // Petición limpia, sin mandar cabeceras "User-Agent" que bloquea el navegador
     return this.http.get<any>(url).pipe(
@@ -44,10 +44,10 @@ export class ComidaService {
   // Función para buscar alimentos por CATEGORÍA (API V2)
   buscarPorCategoria(categoria: string): Observable<Alimento[]> {
     // Añadidos ingredients_analysis_tags y allergens_tags a los "fields" obligatorios
-    const url = `https://world.openfoodfacts.org/api/v2/search?categories_tags_en=${categoria}&fields=code,product_name,brands,image_front_url,nutriments,nutriscore_grade,ingredients_analysis_tags,ingredients_text_es,ingredients_text,allergens_tags&page_size=24`;
+    const url = `https://world.openfoodfacts.org/api/v2/search?categories_tags_en=${categoria}&fields=code,product_name,brands,image_front_url,nutriments,nutriscore_grade,ingredients_analysis_tags,ingredients_text_es,ingredients_text,allergens_tags&page_size=12`;
 
     return this.http.get<any>(url).pipe(
-      retry({ count: 3, delay: 2500 }),
+      retry({ count: 3, delay: 5000 }),
       
       map(response => {
         if (!response.products) return [];

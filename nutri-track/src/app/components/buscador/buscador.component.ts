@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Alimento } from '../../models/alimento.model';
 import { ComidaService } from '../../services/comida.service';
-import { BackendService } from '../../services/backend.service'; // <--- IMPORTANTE
+import { DiarioService } from '../../services/diario.service'; // <--- Cambiado a DiarioService
 import { Subject, debounceTime, switchMap, of, catchError, retry } from 'rxjs';
 
 @Component({
@@ -34,11 +34,10 @@ export class BuscadorComponent {
 
   constructor(
     private comidaService: ComidaService,
-    private backend: BackendService // <--- Inyectamos el servicio de Laravel
+    private diarioService: DiarioService // <--- Inyectamos el servicio específico del Diario
   ) {
-    // Lógica del buscador reactivo con debounce y retry
     this.buscadorSubject.pipe(
-      debounceTime(500), 
+      debounceTime(1500), 
       switchMap(valor => {
         if (!valor || valor.trim().length < 3) {
           this.resultados = [];
@@ -51,7 +50,6 @@ export class BuscadorComponent {
         this.errorApi = false;
         
         return this.comidaService.buscarAlimentos(valor).pipe(
-          retry({ count: 2, delay: 1000 }), 
           catchError(err => {
             console.error('La API ha fallado tras varios intentos:', err);
             this.cargando = false;
@@ -149,32 +147,36 @@ export class BuscadorComponent {
       return;
     }
 
-    // Preparamos el objeto para Laravel siguiendo tu migración
+    // Preparamos el objeto EXACTAMENTE como lo espera tu nueva migración en Laravel
     const registro = {
-      alimento_id: this.alimentoSeleccionado.id.toString(),
       nombre: this.alimentoSeleccionado.nombre,
-      marca: this.alimentoSeleccionado.marca,
+      marca: this.alimentoSeleccionado.marca || 'Genérico',
+      calorias: this.alimentoSeleccionado.calorias,
+      proteinas: this.alimentoSeleccionado.proteinas,
+      carbohidratos: this.alimentoSeleccionado.carbohidratos,
+      grasas: this.alimentoSeleccionado.grasas,
+      cantidadSeleccionada: this.alimentoSeleccionado.cantidadSeleccionada,
       imagen: this.alimentoSeleccionado.imagen,
-      cantidad: this.alimentoSeleccionado.cantidadSeleccionada,
-      // Calculamos macros según la cantidad seleccionada
-      calorias: (this.alimentoSeleccionado.calorias * this.alimentoSeleccionado.cantidadSeleccionada) / 100,
-      proteinas: (this.alimentoSeleccionado.proteinas * this.alimentoSeleccionado.cantidadSeleccionada) / 100,
-      carbohidratos: (this.alimentoSeleccionado.carbohidratos * this.alimentoSeleccionado.cantidadSeleccionada) / 100,
-      grasas: (this.alimentoSeleccionado.grasas * this.alimentoSeleccionado.cantidadSeleccionada) / 100,
-      tipo_comida: 'Comida', // Esto lo haremos dinámico más adelante
-      fecha: new Date().toISOString().split('T')[0] 
+      // NUEVOS CAMPOS: Mapeamos los datos de la API para que Laravel los guarde
+      ingredientesTexto: this.alimentoSeleccionado.ingredientesTexto || 'No hay ingredientes disponibles',
+      // Guardamos los alérgenos como String para que quepan en la DB
+      alergenosTags: JSON.stringify(this.alimentoSeleccionado.alergenosTags || [])
     };
 
-    // Llamada al backend de Laravel
-    this.backend.guardarEnDiario(registro).subscribe({
+    // Llamada al servicio de Diario que conecta con Laravel
+    this.diarioService.guardarAlimento(registro).subscribe({
       next: (res) => {
         console.log('Respuesta de Laravel:', res);
-        alert(`${this.alimentoSeleccionado.nombre} guardado en tu base de datos.`);
+        alert(`¡${this.alimentoSeleccionado.nombre} guardado correctamente!`);
         this.alimentoSeleccionado = null;
       },
       error: (err) => {
         console.error('Error al guardar en Laravel:', err);
-        alert('Hubo un error al conectar con el servidor. Revisa si Laravel está encendido.');
+        if (err.status === 401) {
+          alert('Tu sesión ha caducado. Por favor, inicia sesión de nuevo.');
+        } else {
+          alert('Error al guardar. Revisa la consola o el servidor Laravel.');
+        }
       }
     });
   }

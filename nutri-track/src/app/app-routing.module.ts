@@ -5,13 +5,18 @@ import { DietasComponent } from './pages/dietas/dietas.component';
 import { DiarioComponent } from './pages/diario/diario.component';
 import { StatsComponent } from './pages/stats/stats.component';
 import { HomeComponent } from './pages/home/home.component';
+import { LoginComponent } from './pages/login/login.component';
+import { RegistroComponent } from './pages/registro/registro.component';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'buscar', component: BuscadorComponent },
-  { path: 'stats', component: StatsComponent },
-  { path: 'diario', component: DiarioComponent },
-  { path: 'dietas', component: DietasComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'registro', component: RegistroComponent },
+  { path: 'buscar', component: BuscadorComponent, canActivate: [authGuard] },
+  { path: 'stats', component: StatsComponent, canActivate: [authGuard] },
+  { path: 'dietas', component: DietasComponent, canActivate: [authGuard] },
+  { path: 'diario', component: DiarioComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];
 
