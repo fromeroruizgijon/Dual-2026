@@ -1,77 +1,78 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'; // Eliminamos HttpHeaders de aquí
+import { HttpClient } from '@angular/common/http';
 import { Alimento } from '../models/alimento.model';
 import { Observable, of } from 'rxjs';
-import { map, retry, catchError } from 'rxjs/operators';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ComidaService {
-  // URL base de la API de Open Food Facts para búsquedas de texto
-  private apiUrl = 'https://world.openfoodfacts.org/cgi/search.pl';
+  // Credenciales de Edamam
+  private appId = '926dc453';
+  private appKey = 'd9040651b17c91020b698f0e32674bdc';
+  private apiUrl = 'https://api.edamam.com/api/food-database/v2/parser';
 
   constructor(private http: HttpClient) { }
 
-  // Función para buscar alimentos por nombre (TEXTO LIBRE)
+  // Buscar por texto
   buscarAlimentos(termino: string): Observable<Alimento[]> {
-    const url = `${this.apiUrl}?search_terms=${termino}&search_simple=1&action=process&json=1&page_size=15`;
-    
-    // Petición limpia, sin mandar cabeceras "User-Agent" que bloquea el navegador
+    const url = `${this.apiUrl}?app_id=${this.appId}&app_key=${this.appKey}&ingr=${termino}&nutrition-type=logging`;
+
     return this.http.get<any>(url).pipe(
       map(response => {
-        if (!response.products) return [];
+        if (!response.hints) return [];
 
-        return response.products.map((p: any) => ({
-          id: p.code,
-          nombre: p.product_name || 'Sin nombre',
-          marca: p.brands || 'Marca desconocida',
-          imagen: p.image_front_small_url || 'assets/no-image.png',
-          nutriscore: p.nutriscore_grade,
-          calorias: p.nutriments['energy-kcal_100g'] || 0,
-          carbohidratos: p.nutriments['carbohydrates_100g'] || 0,
-          proteinas: p.nutriments['proteins_100g'] || 0,
-          grasas: p.nutriments['fat_100g'] || 0,
-          // Recogemos las etiquetas para que funcione la alerta de dietas al buscar por texto
-          ingredientesTags: p.ingredients_analysis_tags || [],
-          ingredientesTexto: p.ingredients_text_es || p.ingredients_text || 'Lista de ingredientes no disponible en la base de datos.',
-          alergenosTags: p.allergens_tags || []
-        }));
+        return response.hints.map((item: any) => {
+          const food = item.food;
+          return {
+            id: food.foodId,
+            nombre: food.label || 'Sin nombre',
+            marca: food.brand || 'Genérico',
+            imagen: food.image || 'assets/no-image.png',
+            nutriscore: '', // Edamam no devuelve Nutriscore directamente
+            calorias: food.nutrients.ENERC_KCAL || 0,
+            carbohidratos: food.nutrients.CHOCDF || 0,
+            proteinas: food.nutrients.PROCNT || 0,
+            grasas: food.nutrients.FAT || 0,
+            // Edamam usa healthLabels para dietas y alérgenos
+            ingredientesTags: food.healthLabels || [],
+            ingredientesTexto: food.foodContentsLabel || 'Ingredientes no disponibles.',
+            alergenosTags: food.healthLabels || []
+          };
+        });
+      }),
+      catchError(err => {
+        console.error('Error en Edamam:', err);
+        return of([]);
       })
     );
   }
 
-  // Función para buscar alimentos por CATEGORÍA (API V2)
+  // Buscar por Categoría (Adaptado para Edamam)
   buscarPorCategoria(categoria: string): Observable<Alimento[]> {
-    // Añadidos ingredients_analysis_tags y allergens_tags a los "fields" obligatorios
-    const url = `https://world.openfoodfacts.org/api/v2/search?categories_tags_en=${categoria}&fields=code,product_name,brands,image_front_url,nutriments,nutriscore_grade,ingredients_analysis_tags,ingredients_text_es,ingredients_text,allergens_tags&page_size=12`;
+    // Edamam permite filtrar por categoría en la misma URL de búsqueda
+    const url = `${this.apiUrl}?app_id=${this.appId}&app_key=${this.appKey}&category=${categoria}&nutrition-type=logging`;
 
     return this.http.get<any>(url).pipe(
-      retry({ count: 3, delay: 5000 }),
-      
       map(response => {
-        if (!response.products) return [];
-        return response.products
-          .filter((p: any) => p.product_name && p.nutriments)
-          .map((p: any) => ({
-            id: p.code || p._id,
-            nombre: p.product_name,
-            marca: p.brands || 'Sin marca',
-            imagen: p.image_front_url || 'https://via.placeholder.com/150?text=Sin+Imagen',
-            calorias: p.nutriments['energy-kcal_100g'] || 0,
-            proteinas: p.nutriments.proteins_100g || 0,
-            carbohidratos: p.nutriments.carbohydrates_100g || 0,
-            grasas: p.nutriments.fat_100g || 0,
-            nutriscore: p.nutriscore_grade || '',
-            // Guardamos las etiquetas ocultas de la API V2
-            ingredientesTags: p.ingredients_analysis_tags || [],
-            ingredientesTexto: p.ingredients_text_es || p.ingredients_text || 'Lista de ingredientes no disponible en la base de datos.',
-            alergenosTags: p.allergens_tags || []
-          }));
+        if (!response.hints) return [];
+        return response.hints.map((item: any) => ({
+          id: item.food.foodId,
+          nombre: item.food.label,
+          marca: item.food.brand || 'Genérico',
+          imagen: item.food.image || 'https://via.placeholder.com/150?text=Sin+Imagen',
+          calorias: item.food.nutrients.ENERC_KCAL || 0,
+          proteinas: item.food.nutrients.PROCNT || 0,
+          carbohidratos: item.food.nutrients.CHOCDF || 0,
+          grasas: item.food.nutrients.FAT || 0,
+          ingredientesTags: item.food.healthLabels || [],
+          ingredientesTexto: item.food.foodContentsLabel || 'Ingredientes no disponibles.',
+          alergenosTags: item.food.healthLabels || []
+        }));
       }),
-      
       catchError(err => {
-        console.error('API saturada tras 4 intentos:', err);
+        console.error('Error categoría Edamam:', err);
         return of([]);
       })
     );
