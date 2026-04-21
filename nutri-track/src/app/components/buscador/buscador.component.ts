@@ -18,11 +18,15 @@ export class BuscadorComponent {
   errorApi: boolean = false;
   alertaDieta: string | null = null;
   categoriaActiva: string = '';
+  
+  // Paginación
+  paginaActual: number = 1;
+  hayMasResultados: boolean = false;
 
   categoriasRapidas = [
-    { id: 'generic-foods', nombre: 'Genéricos', icono: '🍎' },
-    { id: 'packaged-foods', nombre: 'Envasados', icono: '📦' },
-    { id: 'fast-foods', nombre: 'Rápida', icono: '🍔' }
+    { id: 'en:beverages', nombre: 'Bebidas', icono: '🥤' },
+    { id: 'en:snacks', nombre: 'Snacks', icono: '🍿' },
+    { id: 'en:meals', nombre: 'Platos', icono: '🍽️' }
   ];
 
   private buscadorSubject = new Subject<string>();
@@ -32,7 +36,7 @@ export class BuscadorComponent {
     private diarioService: DiarioService
   ) {
     this.buscadorSubject.pipe(
-      debounceTime(800), // Bajamos el tiempo porque Edamam es más estable
+      debounceTime(1200), // Un poco más de tiempo para ser "buenos" con la API
       switchMap(valor => {
         if (!valor || valor.trim().length < 3) {
           this.resultados = [];
@@ -41,7 +45,8 @@ export class BuscadorComponent {
         }
         this.cargando = true;
         this.errorApi = false;
-        return this.comidaService.buscarAlimentos(valor).pipe(
+        this.paginaActual = 1;
+        return this.comidaService.buscarAlimentos(valor, this.paginaActual).pipe(
           catchError(() => {
             this.errorApi = true;
             this.cargando = false;
@@ -51,26 +56,49 @@ export class BuscadorComponent {
       })
     ).subscribe(data => {
       this.resultados = data;
+      this.hayMasResultados = data.length === 6;
       this.cargando = false;
     });
   }
 
   onKeySearch(texto: string) { this.buscadorSubject.next(texto); }
-  buscarManual() { this.buscadorSubject.next(this.termino); }
 
-  buscarCategoria(categoriaId: string) {
-    this.termino = '';
+  buscarManual() {
+    if (this.termino.trim().length < 3) return;
     this.cargando = true;
-    this.categoriaActiva = categoriaId;
-    this.comidaService.buscarPorCategoria(categoriaId).subscribe({
+    this.paginaActual = 1;
+    this.comidaService.buscarAlimentos(this.termino, this.paginaActual).subscribe({
       next: (data) => {
         this.resultados = data;
+        this.hayMasResultados = data.length === 6;
         this.cargando = false;
       },
-      error: () => {
-        this.errorApi = true;
+      error: () => { this.errorApi = true; this.cargando = false; }
+    });
+  }
+
+  cargarMas() {
+    this.paginaActual++;
+    this.cargando = true;
+    this.comidaService.buscarAlimentos(this.termino, this.paginaActual).subscribe(data => {
+      this.resultados = [...this.resultados, ...data];
+      this.hayMasResultados = data.length === 6;
+      this.cargando = false;
+    });
+  }
+
+  buscarCategoria(categoriaId: string) {
+    this.limpiarBusqueda();
+    this.cargando = true;
+    this.categoriaActiva = categoriaId;
+    this.paginaActual = 1;
+    this.comidaService.buscarPorCategoria(categoriaId, this.paginaActual).subscribe({
+      next: (data) => {
+        this.resultados = data;
+        this.hayMasResultados = data.length === 6;
         this.cargando = false;
-      }
+      },
+      error: () => { this.errorApi = true; this.cargando = false; }
     });
   }
 
@@ -79,6 +107,7 @@ export class BuscadorComponent {
     this.resultados = [];
     this.categoriaActiva = '';
     this.cargando = false;
+    this.hayMasResultados = false;
   }
 
   verDetalles(alimento: any) {
@@ -89,31 +118,18 @@ export class BuscadorComponent {
   comprobarCompatibilidad(alimento: any) {
     const miDieta = localStorage.getItem('miDieta') || 'ninguna';
     this.alertaDieta = null;
-    if (miDieta === 'ninguna') return;
-
     const tags = alimento.ingredientesTags || [];
-
-    // Mapeo de Edamam: Mucho más sencillo
-    if (miDieta === 'vegana' && !tags.includes('VEGAN')) {
-      this.alertaDieta = '🚫 No tiene certificado Vegano.';
-    } 
-    else if (miDieta === 'vegetariana' && !tags.includes('VEGETARIAN')) {
-      this.alertaDieta = '🚫 No apto para vegetarianos.';
-    } 
-    else if (miDieta === 'singluten' && !tags.includes('GLUTEN_FREE')) {
-      this.alertaDieta = '⚠️ ATENCIÓN: Puede contener Gluten.';
-    }
-    else if (miDieta === 'sinlactosa' && !tags.includes('DAIRY_FREE')) {
-      this.alertaDieta = '⚠️ ATENCIÓN: Contiene lácteos.';
-    }
+    if (miDieta === 'vegana' && !tags.includes('en:vegan')) this.alertaDieta = '🚫 No tiene certificado Vegano.';
+    else if (miDieta === 'vegetariana' && !tags.includes('en:vegetarian')) this.alertaDieta = '🚫 No apto para vegetarianos.';
+    else if (miDieta === 'singluten' && !tags.includes('en:gluten-free')) this.alertaDieta = '⚠️ ATENCIÓN: Puede contener Gluten.';
+    else if (miDieta === 'sinlactosa' && !tags.includes('en:no-dairy')) this.alertaDieta = '⚠️ ATENCIÓN: Contiene lácteos.';
   }
 
   aniadirAlDiario() {
-    if (!this.alimentoSeleccionado || !this.alimentoSeleccionado.cantidadSeleccionada) {
+    if (!this.alimentoSeleccionado?.cantidadSeleccionada) {
       alert('Introduce una cantidad');
       return;
     }
-
     const registro = {
       nombre: this.alimentoSeleccionado.nombre,
       marca: this.alimentoSeleccionado.marca,
@@ -126,13 +142,9 @@ export class BuscadorComponent {
       ingredientesTexto: this.alimentoSeleccionado.ingredientesTexto,
       alergenosTags: JSON.stringify(this.alimentoSeleccionado.alergenosTags)
     };
-
     this.diarioService.guardarAlimento(registro).subscribe({
-      next: () => {
-        alert('Guardado en Laravel');
-        this.alimentoSeleccionado = null;
-      },
-      error: () => alert('Error al conectar con Laravel')
+      next: () => { alert('Guardado'); this.alimentoSeleccionado = null; },
+      error: () => alert('Error con Laravel')
     });
   }
 }

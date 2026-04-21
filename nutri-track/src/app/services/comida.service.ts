@@ -8,73 +8,69 @@ import { map, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ComidaService {
-  // Credenciales de Edamam
-  private appId = '926dc453';
-  private appKey = 'd9040651b17c91020b698f0e32674bdc';
-  private apiUrl = 'https://api.edamam.com/api/food-database/v2/parser';
+  private apiUrl = 'https://world.openfoodfacts.org/cgi/search.pl';
+  
+  // Tu identificación oficial
+  private userTag = 'faganromero2006'; 
 
   constructor(private http: HttpClient) { }
 
-  // Buscar por texto
-  buscarAlimentos(termino: string): Observable<Alimento[]> {
-    const url = `${this.apiUrl}?app_id=${this.appId}&app_key=${this.appKey}&ingr=${termino}&nutrition-type=logging`;
+  buscarAlimentos(termino: string, pagina: number = 1): Observable<Alimento[]> {
+    const fields = 'product_name,brands,image_small_url,nutriments,nutriscore_grade,labels_tags,id';
+    
+    // Configuramos 6 resultados por página y nos identificamos
+    const url = `${this.apiUrl}?search_terms=${encodeURIComponent(termino)}` +
+                `&search_simple=1&action=process&json=1` +
+                `&fields=${fields}` +
+                `&page_size=6` + 
+                `&page=${pagina}` +
+                `&tagtype_0=countries&tag_0=spain` + 
+                `&user=${this.userTag}`;
 
     return this.http.get<any>(url).pipe(
       map(response => {
-        if (!response.hints) return [];
-
-        return response.hints.map((item: any) => {
-          const food = item.food;
-          return {
-            id: food.foodId,
-            nombre: food.label || 'Sin nombre',
-            marca: food.brand || 'Genérico',
-            imagen: food.image || 'assets/no-image.png',
-            nutriscore: '', // Edamam no devuelve Nutriscore directamente
-            calorias: food.nutrients.ENERC_KCAL || 0,
-            carbohidratos: food.nutrients.CHOCDF || 0,
-            proteinas: food.nutrients.PROCNT || 0,
-            grasas: food.nutrients.FAT || 0,
-            // Edamam usa healthLabels para dietas y alérgenos
-            ingredientesTags: food.healthLabels || [],
-            ingredientesTexto: food.foodContentsLabel || 'Ingredientes no disponibles.',
-            alergenosTags: food.healthLabels || []
-          };
-        });
+        if (!response || !response.products) return [];
+        return response.products.map((food: any) => this.mapearAlimento(food));
       }),
       catchError(err => {
-        console.error('Error en Edamam:', err);
+        console.error('Error en API:', err);
         return of([]);
       })
     );
   }
 
-  // Buscar por Categoría (Adaptado para Edamam)
-  buscarPorCategoria(categoria: string): Observable<Alimento[]> {
-    // Edamam permite filtrar por categoría en la misma URL de búsqueda
-    const url = `${this.apiUrl}?app_id=${this.appId}&app_key=${this.appKey}&category=${categoria}&nutrition-type=logging`;
+  buscarPorCategoria(categoria: string, pagina: number = 1): Observable<Alimento[]> {
+    const fields = 'product_name,brands,image_small_url,nutriments,nutriscore_grade,labels_tags,id';
+    const url = `${this.apiUrl}?tagtype_0=categories&tag_0=${categoria}` +
+                `&fields=${fields}&action=process&json=1&page_size=6&page=${pagina}&user=${this.userTag}`;
 
     return this.http.get<any>(url).pipe(
       map(response => {
-        if (!response.hints) return [];
-        return response.hints.map((item: any) => ({
-          id: item.food.foodId,
-          nombre: item.food.label,
-          marca: item.food.brand || 'Genérico',
-          imagen: item.food.image || 'https://via.placeholder.com/150?text=Sin+Imagen',
-          calorias: item.food.nutrients.ENERC_KCAL || 0,
-          proteinas: item.food.nutrients.PROCNT || 0,
-          carbohidratos: item.food.nutrients.CHOCDF || 0,
-          grasas: item.food.nutrients.FAT || 0,
-          ingredientesTags: item.food.healthLabels || [],
-          ingredientesTexto: item.food.foodContentsLabel || 'Ingredientes no disponibles.',
-          alergenosTags: item.food.healthLabels || []
-        }));
+        if (!response || !response.products) return [];
+        return response.products.map((food: any) => this.mapearAlimento(food));
       }),
       catchError(err => {
-        console.error('Error categoría Edamam:', err);
+        console.error('Error categoría:', err);
         return of([]);
       })
     );
+  }
+
+  private mapearAlimento(food: any): Alimento {
+    const nuts = food.nutriments || {};
+    return {
+      id: food.id || food._id || Math.random().toString(),
+      nombre: food.product_name || 'Sin nombre',
+      marca: food.brands || 'Genérico',
+      imagen: food.image_small_url || 'assets/no-image.png',
+      nutriscore: food.nutriscore_grade || '',
+      calorias: Math.round(nuts['energy-kcal_100g'] || 0),
+      carbohidratos: nuts.carbohydrates_100g || 0,
+      proteinas: nuts.proteins_100g || 0,
+      grasas: nuts.fat_100g || 0,
+      ingredientesTags: food.labels_tags || [],
+      ingredientesTexto: food.ingredients_text || 'No disponible',
+      alergenosTags: food.labels_tags || []
+    };
   }
 }
