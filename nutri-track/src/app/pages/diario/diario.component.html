@@ -1,49 +1,46 @@
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📝 Mi Diario de Hoy</h2>
-    <span *ngIf="registros.length > 0" class="badge bg-success fs-6 shadow-sm">
-      Total hoy: {{ totales.calorias | number:'1.0-0' }} kcal
+    <h2 class="text-success fw-bold">📝 Mi Diario de Hoy</h2>
+    <span *ngIf="registros.length > 0" class="badge bg-success fs-5 shadow-sm px-3 py-2">
+      🔥 Total: {{ totales.calorias | number:'1.0-0' }} kcal
     </span>
   </div>
 
   <div *ngIf="registros.length > 0; else diarioVacio">
     <div class="card shadow-sm border-0 overflow-hidden">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+        <table class="table table-hover align-middle mb-0 text-center">
+          <thead class="table-success text-white">
             <tr>
-              <th class="ps-3">Producto</th>
+              <th class="ps-4 text-start">Receta</th>
               <th>Cantidad</th>
               <th>Calorías</th>
               <th>Proteínas</th>
               <th>Grasas</th>
-              <th class="text-center">Acciones</th>
+              <th>Carbos</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let reg of registros; let i = index">
-              <td class="ps-3">
+              <td class="ps-4 text-start">
                 <div class="d-flex align-items-center">
-                  <img [src]="reg.imagen" class="rounded border me-3" 
-                       style="width: 45px; height: 45px; object-fit: contain; background: white;">
+                  <img [src]="reg.imagen" class="rounded shadow-sm me-3" 
+                       style="width: 50px; height: 50px; object-fit: cover;">
                   <div>
-                    <span class="d-block fw-bold">{{ reg.nombre }}</span>
-                    <small class="text-muted">{{ reg.marca }}</small>
+                    <span class="d-block fw-bold text-dark">{{ reg.nombre }}</span>
+                    <span class="badge bg-secondary opacity-75 small">{{ reg.marca }}</span>
                   </div>
                 </div>
               </td>
-              <td><span class="badge bg-light text-dark border">{{ reg.cantidadSeleccionada }}g</span></td>
-              <td class="fw-bold text-success">
-                {{ (reg.calorias * reg.cantidadSeleccionada / 100) | number:'1.0-0' }} kcal
-              </td>
-              <td>{{ (reg.proteinas * reg.cantidadSeleccionada / 100) | number:'1.1-1' }}g</td>
-              <td>{{ (reg.grasas * reg.cantidadSeleccionada / 100) | number:'1.1-1' }}g</td>
-              <td class="text-center">
-                <button class="btn btn-outline-danger btn-sm border-0" (click)="borrarRegistro(i)" title="Eliminar">
+              <td><span class="badge bg-light text-dark border">{{ reg.cantidad }}g</span></td>
+              <td class="fw-bold text-success">{{ reg.calorias | number:'1.0-0' }} kcal</td>
+              <td class="text-primary">{{ reg.proteinas | number:'1.1-1' }}g</td>
+              <td class="text-danger">{{ reg.grasas | number:'1.1-1' }}g</td>
+              <td class="text-warning text-dark">{{ reg.carbohidratos | number:'1.1-1' }}g</td>
+              <td>
+                <button class="btn btn-outline-danger btn-sm border-0 me-1" (click)="borrarRegistro(i)" title="Eliminar">
                   <i class="bi bi-trash3-fill"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-info rounded-circle ms-2" (click)="verIngredientes(reg)" title="Ver ingredientes">
-                  <i class="bi bi-info-circle"></i>
                 </button>
               </td>
             </tr>
@@ -54,60 +51,12 @@
   </div>
 
   <ng-template #diarioVacio>
-    <div class="text-center py-5 shadow-sm bg-white rounded border border-dashed">
-      <i class="bi bi-calendar2-x text-muted" style="font-size: 4rem; opacity: 0.3;"></i>
-      <h3 class="mt-3 text-secondary">Tu diario está vacío</h3>
-      <p class="text-muted">Aún no has registrado ningún alimento para el día de hoy.</p>
-      <button class="btn btn-success px-4 rounded-pill shadow-sm" routerLink="/buscar">
-        <i class="bi bi-search me-2"></i>Ir al buscador
+    <div class="text-center py-5 shadow-sm bg-white rounded-4 border">
+      <h3 class="mt-3 text-secondary fw-bold">Tu diario está vacío</h3>
+      <p class="text-muted">Aún no has registrado ninguna receta para el día de hoy.</p>
+      <button class="btn btn-success px-4 mt-2 rounded-pill shadow-sm fw-bold" routerLink="/buscar">
+        Ir al buscador
       </button>
     </div>
   </ng-template>
-</div>
-
-<div class="modal fade" [ngClass]="{'show d-block': alimentoDetalle}" 
-     tabindex="-1" *ngIf="alimentoDetalle" 
-     style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
-  
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content border-0 shadow-lg">
-      
-      <div class="modal-header bg-info text-white">
-        <h5 class="modal-title fw-bold">
-          <i class="bi bi-card-text me-2"></i> Detalles del producto
-        </h5>
-        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
-      </div>
-
-      <div class="modal-body">
-        <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
-          <img [src]="alimentoDetalle.imagen" alt="Imagen producto" 
-               class="rounded shadow-sm me-3" style="width: 80px; height: 80px; object-fit: cover;">
-          <div>
-            <h5 class="mb-1 fw-bold">{{ alimentoDetalle.nombre }}</h5>
-            <p class="text-muted mb-0 small">{{ alimentoDetalle.marca }}</p>
-          </div>
-        </div>
-
-        <h6 class="fw-bold text-dark mb-2">Lista de Ingredientes:</h6>
-        <div class="bg-light p-3 rounded border small text-muted" style="line-height: 1.6;">
-          {{ alimentoDetalle.ingredientesTexto }}
-        </div>
-
-        <div class="mt-4" *ngIf="alimentoDetalle.alergenosTags?.length > 0">
-          <h6 class="fw-bold text-danger mb-2"><i class="bi bi-exclamation-triangle me-1"></i> Alérgenos detectados:</h6>
-          <div class="d-flex flex-wrap gap-1">
-            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger" *ngFor="let alergeno of alimentoDetalle.alergenosTags">
-              {{ alergeno.substring(3) | uppercase }} 
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer bg-light">
-        <button type="button" class="btn btn-secondary px-4 rounded-pill" (click)="cerrarModal()">Cerrar</button>
-      </div>
-      
-    </div>
-  </div>
 </div>

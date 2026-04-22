@@ -8,29 +8,34 @@ import { map, catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ComidaService {
-  private apiUrl = 'https://world.openfoodfacts.org/cgi/search.pl';
-  
-  // Tu identificación oficial
-  private userTag = 'faganromero2006'; 
+  private apiUrl = 'https://www.themealdb.com/api/json/v1/1';
+
+  // Nuestro "Simulador" de macros (Valores medios por cada 100g de producto)
+  private macrosPorCategoria: any = {
+    'Beef': { calorias: 250, proteinas: 26, carbohidratos: 0, grasas: 15 },
+    'Chicken': { calorias: 165, proteinas: 31, carbohidratos: 0, grasas: 3.6 },
+    'Pasta': { calorias: 350, proteinas: 12, carbohidratos: 65, grasas: 5 },
+    'Seafood': { calorias: 100, proteinas: 20, carbohidratos: 0, grasas: 2 },
+    'Vegan': { calorias: 150, proteinas: 5, carbohidratos: 20, grasas: 5 },
+    'Vegetarian': { calorias: 200, proteinas: 8, carbohidratos: 25, grasas: 7 },
+    'Dessert': { calorias: 400, proteinas: 4, carbohidratos: 60, grasas: 18 },
+    'default': { calorias: 250, proteinas: 15, carbohidratos: 30, grasas: 10 }
+  };
 
   constructor(private http: HttpClient) { }
 
-  buscarAlimentos(termino: string, pagina: number = 1): Observable<Alimento[]> {
-    const fields = 'product_name,brands,image_small_url,nutriments,nutriscore_grade,labels_tags,id';
-    
-    // Configuramos 6 resultados por página y nos identificamos
-    const url = `${this.apiUrl}?search_terms=${encodeURIComponent(termino)}` +
-                `&search_simple=1&action=process&json=1` +
-                `&fields=${fields}` +
-                `&page_size=6` + 
-                `&page=${pagina}` +
-                `&tagtype_0=countries&tag_0=spain` + 
-                `&user=${this.userTag}`;
-
-    return this.http.get<any>(url).pipe(
+  // 1. Busca la lista general de platos por ingrediente
+  buscarPorIngrediente(ingrediente: string): Observable<Alimento[]> {
+    return this.http.get<any>(`${this.apiUrl}/filter.php?i=${ingrediente}`).pipe(
       map(response => {
-        if (!response || !response.products) return [];
-        return response.products.map((food: any) => this.mapearAlimento(food));
+        if (!response || !response.meals) return [];
+        return response.meals.map((meal: any) => ({
+          id: meal.idMeal,
+          nombre: meal.strMeal,
+          categoria: '', // Se llena al pedir los detalles
+          imagen: meal.strMealThumb,
+          calorias: 0, carbohidratos: 0, proteinas: 0, grasas: 0
+        }));
       }),
       catchError(err => {
         console.error('Error en API:', err);
@@ -39,38 +44,43 @@ export class ComidaService {
     );
   }
 
-  buscarPorCategoria(categoria: string, pagina: number = 1): Observable<Alimento[]> {
-    const fields = 'product_name,brands,image_small_url,nutriments,nutriscore_grade,labels_tags,id';
-    const url = `${this.apiUrl}?tagtype_0=categories&tag_0=${categoria}` +
-                `&fields=${fields}&action=process&json=1&page_size=6&page=${pagina}&user=${this.userTag}`;
-
-    return this.http.get<any>(url).pipe(
+  // 2. Obtiene la receta completa y le inyecta los macros
+  obtenerDetalles(id: string): Observable<Alimento | null> {
+    return this.http.get<any>(`${this.apiUrl}/lookup.php?i=${id}`).pipe(
       map(response => {
-        if (!response || !response.products) return [];
-        return response.products.map((food: any) => this.mapearAlimento(food));
+        if (!response || !response.meals) return null;
+        const plato = response.meals[0];
+        const ingredientesLimpio = [];
+
+        // Extraemos los hasta 20 ingredientes
+        for (let i = 1; i <= 20; i++) {
+          const ing = plato[`strIngredient${i}`];
+          const med = plato[`strMeasure${i}`];
+          if (ing && ing.trim() !== '') {
+            ingredientesLimpio.push(`${med} ${ing}`.trim());
+          }
+        }
+
+        const categoria = plato.strCategory || 'default';
+        const macros = this.macrosPorCategoria[categoria] || this.macrosPorCategoria['default'];
+
+        return {
+          id: plato.idMeal,
+          nombre: plato.strMeal,
+          categoria: categoria,
+          imagen: plato.strMealThumb,
+          instrucciones: plato.strInstructions,
+          listaIngredientes: ingredientesLimpio,
+          calorias: macros.calorias,
+          proteinas: macros.proteinas,
+          carbohidratos: macros.carbohidratos,
+          grasas: macros.grasas
+        };
       }),
       catchError(err => {
-        console.error('Error categoría:', err);
-        return of([]);
+        console.error('Error detalles:', err);
+        return of(null);
       })
     );
-  }
-
-  private mapearAlimento(food: any): Alimento {
-    const nuts = food.nutriments || {};
-    return {
-      id: food.id || food._id || Math.random().toString(),
-      nombre: food.product_name || 'Sin nombre',
-      marca: food.brands || 'Genérico',
-      imagen: food.image_small_url || 'assets/no-image.png',
-      nutriscore: food.nutriscore_grade || '',
-      calorias: Math.round(nuts['energy-kcal_100g'] || 0),
-      carbohidratos: nuts.carbohydrates_100g || 0,
-      proteinas: nuts.proteins_100g || 0,
-      grasas: nuts.fat_100g || 0,
-      ingredientesTags: food.labels_tags || [],
-      ingredientesTexto: food.ingredients_text || 'No disponible',
-      alergenosTags: food.labels_tags || []
-    };
   }
 }

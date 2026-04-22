@@ -6,15 +6,12 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('diarios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relación con usuario
-            $table->string('alimento_id'); // ID de la API (code)
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('alimento_id'); 
             $table->string('nombre');
             $table->string('marca')->nullable();
             $table->string('imagen')->nullable();
@@ -23,15 +20,12 @@ return new class extends Migration
             $table->float('proteinas');
             $table->float('carbohidratos');
             $table->float('grasas');
-            $table->string('tipo_comida'); // Desayuno, Comida, etc.
-            $table->date('fecha'); // La clave para las estadísticas por mes/año
+            $table->string('tipo_comida'); 
+            $table->date('fecha'); 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('diarios');

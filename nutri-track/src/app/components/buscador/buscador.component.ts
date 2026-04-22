@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { Alimento } from '../../models/alimento.model';
 import { ComidaService } from '../../services/comida.service';
 import { DiarioService } from '../../services/diario.service';
-import { Subject, debounceTime, switchMap, of, catchError } from 'rxjs';
 
 @Component({
   selector: 'app-buscador',
@@ -11,140 +10,79 @@ import { Subject, debounceTime, switchMap, of, catchError } from 'rxjs';
   styleUrl: './buscador.component.scss'
 })
 export class BuscadorComponent {
-  termino: string = '';           
   resultados: Alimento[] = [];    
   cargando: boolean = false;      
-  alimentoSeleccionado: any | null = null;
-  errorApi: boolean = false;
-  alertaDieta: string | null = null;
+  cargandoDetalles: boolean = false;
+  alimentoSeleccionado: Alimento | null = null;
   categoriaActiva: string = '';
-  
-  // Paginación
-  paginaActual: number = 1;
-  hayMasResultados: boolean = false;
 
-  categoriasRapidas = [
-    { id: 'en:beverages', nombre: 'Bebidas', icono: '🥤' },
-    { id: 'en:snacks', nombre: 'Snacks', icono: '🍿' },
-    { id: 'en:meals', nombre: 'Platos', icono: '🍽️' }
+  // Menú de ingredientes: Español para el usuario, Inglés para la API
+  ingredientesPrincipales = [
+    { nombre: 'Pollo', busqueda: 'chicken_breast', icono: '🍗' },
+    { nombre: 'Salmón', busqueda: 'salmon', icono: '🍣' },
+    { nombre: 'Huevo', busqueda: 'egg', icono: '🥚' },
+    { nombre: 'Cerdo', busqueda: 'pork', icono: '🥓' },
+    { nombre: 'Aguacate', busqueda: 'avocado', icono: '🥑' },
+    { nombre: 'Ajo', busqueda: 'garlic', icono: '🧄' }
   ];
-
-  private buscadorSubject = new Subject<string>();
 
   constructor(
     private comidaService: ComidaService,
     private diarioService: DiarioService
-  ) {
-    this.buscadorSubject.pipe(
-      debounceTime(1200), // Un poco más de tiempo para ser "buenos" con la API
-      switchMap(valor => {
-        if (!valor || valor.trim().length < 3) {
-          this.resultados = [];
-          this.cargando = false;
-          return of([]); 
-        }
-        this.cargando = true;
-        this.errorApi = false;
-        this.paginaActual = 1;
-        return this.comidaService.buscarAlimentos(valor, this.paginaActual).pipe(
-          catchError(() => {
-            this.errorApi = true;
-            this.cargando = false;
-            return of([]); 
-          })
-        );
-      })
-    ).subscribe(data => {
-      this.resultados = data;
-      this.hayMasResultados = data.length === 6;
-      this.cargando = false;
-    });
-  }
+  ) {}
 
-  onKeySearch(texto: string) { this.buscadorSubject.next(texto); }
-
-  buscarManual() {
-    if (this.termino.trim().length < 3) return;
+  buscarCategoria(ingrediente: string) {
     this.cargando = true;
-    this.paginaActual = 1;
-    this.comidaService.buscarAlimentos(this.termino, this.paginaActual).subscribe({
-      next: (data) => {
-        this.resultados = data;
-        this.hayMasResultados = data.length === 6;
-        this.cargando = false;
-      },
-      error: () => { this.errorApi = true; this.cargando = false; }
-    });
-  }
-
-  cargarMas() {
-    this.paginaActual++;
-    this.cargando = true;
-    this.comidaService.buscarAlimentos(this.termino, this.paginaActual).subscribe(data => {
-      this.resultados = [...this.resultados, ...data];
-      this.hayMasResultados = data.length === 6;
-      this.cargando = false;
-    });
-  }
-
-  buscarCategoria(categoriaId: string) {
-    this.limpiarBusqueda();
-    this.cargando = true;
-    this.categoriaActiva = categoriaId;
-    this.paginaActual = 1;
-    this.comidaService.buscarPorCategoria(categoriaId, this.paginaActual).subscribe({
-      next: (data) => {
-        this.resultados = data;
-        this.hayMasResultados = data.length === 6;
-        this.cargando = false;
-      },
-      error: () => { this.errorApi = true; this.cargando = false; }
-    });
-  }
-
-  limpiarBusqueda() {
-    this.termino = '';
     this.resultados = [];
-    this.categoriaActiva = '';
-    this.cargando = false;
-    this.hayMasResultados = false;
+    this.categoriaActiva = ingrediente;
+
+    this.comidaService.buscarPorIngrediente(ingrediente).subscribe(data => {
+      this.resultados = data;
+      this.cargando = false;
+    });
   }
 
-  verDetalles(alimento: any) {
-    this.alimentoSeleccionado = alimento;
-    this.comprobarCompatibilidad(alimento);
-  }
-
-  comprobarCompatibilidad(alimento: any) {
-    const miDieta = localStorage.getItem('miDieta') || 'ninguna';
-    this.alertaDieta = null;
-    const tags = alimento.ingredientesTags || [];
-    if (miDieta === 'vegana' && !tags.includes('en:vegan')) this.alertaDieta = '🚫 No tiene certificado Vegano.';
-    else if (miDieta === 'vegetariana' && !tags.includes('en:vegetarian')) this.alertaDieta = '🚫 No apto para vegetarianos.';
-    else if (miDieta === 'singluten' && !tags.includes('en:gluten-free')) this.alertaDieta = '⚠️ ATENCIÓN: Puede contener Gluten.';
-    else if (miDieta === 'sinlactosa' && !tags.includes('en:no-dairy')) this.alertaDieta = '⚠️ ATENCIÓN: Contiene lácteos.';
+  verDetalles(alimento: Alimento) {
+    this.cargandoDetalles = true;
+    if(alimento.id) {
+        this.comidaService.obtenerDetalles(alimento.id).subscribe(detalle => {
+          if (detalle) {
+            this.alimentoSeleccionado = detalle;
+          }
+          this.cargandoDetalles = false;
+        });
+    }
   }
 
   aniadirAlDiario() {
     if (!this.alimentoSeleccionado?.cantidadSeleccionada) {
-      alert('Introduce una cantidad');
+      alert('Por favor, introduce los gramos');
       return;
     }
+
+    // Calculamos los macros reales según los gramos introducidos (Base 100g)
+    const factor = this.alimentoSeleccionado.cantidadSeleccionada / 100;
+
     const registro = {
+      alimento_id: this.alimentoSeleccionado.id,
       nombre: this.alimentoSeleccionado.nombre,
-      marca: this.alimentoSeleccionado.marca,
-      calorias: this.alimentoSeleccionado.calorias,
-      proteinas: this.alimentoSeleccionado.proteinas,
-      carbohidratos: this.alimentoSeleccionado.carbohidratos,
-      grasas: this.alimentoSeleccionado.grasas,
-      cantidadSeleccionada: this.alimentoSeleccionado.cantidadSeleccionada,
+      marca: this.alimentoSeleccionado.categoria, // Guardamos la categoría del plato aquí
       imagen: this.alimentoSeleccionado.imagen,
-      ingredientesTexto: this.alimentoSeleccionado.ingredientesTexto,
-      alergenosTags: JSON.stringify(this.alimentoSeleccionado.alergenosTags)
+      cantidad: this.alimentoSeleccionado.cantidadSeleccionada,
+      calorias: this.alimentoSeleccionado.calorias * factor,
+      proteinas: this.alimentoSeleccionado.proteinas * factor,
+      carbohidratos: this.alimentoSeleccionado.carbohidratos * factor,
+      grasas: this.alimentoSeleccionado.grasas * factor,
+      tipo_comida: 'Comida', // Valor por defecto
+      fecha: new Date().toISOString().split('T')[0] // Se guarda con la fecha de hoy YYYY-MM-DD
     };
+
     this.diarioService.guardarAlimento(registro).subscribe({
-      next: () => { alert('Guardado'); this.alimentoSeleccionado = null; },
-      error: () => alert('Error con Laravel')
+      next: () => { 
+        alert('¡Añadido a tu diario con éxito!'); 
+        this.alimentoSeleccionado = null; 
+      },
+      error: () => alert('Error de conexión con Laravel')
     });
   }
 }

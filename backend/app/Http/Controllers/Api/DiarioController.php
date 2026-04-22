@@ -4,35 +4,34 @@ namespace App\Http\Controllers\Api;
 
 class DiarioController extends \App\Http\Controllers\Controller
 {
-    /**
-     * Guarda un nuevo alimento en el diario.
-     */
     public function store(\Illuminate\Http\Request $request)
     {
+        // Validamos TODOS los campos que nos envía Angular
         $validated = $request->validate([
+            'alimento_id' => 'required|string',
             'nombre' => 'required|string',
             'marca' => 'nullable|string',
+            'imagen' => 'nullable|string',
+            'cantidad' => 'required|numeric',
             'calorias' => 'required|numeric',
             'proteinas' => 'required|numeric',
             'carbohidratos' => 'required|numeric',
             'grasas' => 'required|numeric',
-            'cantidadSeleccionada' => 'required|numeric',
-            'imagen' => 'nullable|string',
+            'tipo_comida' => 'required|string',
+            'fecha' => 'required|date',
         ]);
 
-        // YA NO USAMOS EL 1 FIJO. Laravel detecta al usuario por el token:
+        // Laravel detecta al usuario por el token de autenticación:
         $validated['user_id'] = $request->user()->id; 
 
         $registro = \App\Models\Diario::create($validated);
         return response()->json($registro, 201);
     }
 
-    /**
-     * Obtiene los alimentos de un día concreto.
-     */
-    public function getPorFecha($fecha)
+    public function getPorFecha($fecha, \Illuminate\Http\Request $request)
     {
-        $registros = \App\Models\Diario::where('user_id', 1)
+        // OJO: He cambiado el "1" duro por el ID del usuario real para que te funcione a futuro
+        $registros = \App\Models\Diario::where('user_id', $request->user()->id)
             ->where('fecha', $fecha)
             ->get();
 

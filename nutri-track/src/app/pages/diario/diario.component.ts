@@ -19,25 +19,11 @@ export class DiarioComponent implements OnInit {
   }
 
   cargarDiarioDesdeBackend() {
-    // Obtenemos la fecha de hoy en formato YYYY-MM-DD
     const hoy = new Date().toISOString().split('T')[0];
     
     this.diarioService.obtenerDiario(hoy).subscribe({
       next: (data) => {
         this.registros = data;
-        
-        // Procesamos los datos que vienen de la DB
-        this.registros.forEach(reg => {
-          // Convertimos los alérgenos de texto plano a Array de nuevo
-          if (reg.alergenosTags && typeof reg.alergenosTags === 'string') {
-            try {
-              reg.alergenosTags = JSON.parse(reg.alergenosTags);
-            } catch (e) {
-              reg.alergenosTags = [];
-            }
-          }
-        });
-
         this.calcularTotales();
       },
       error: (err) => {
@@ -48,21 +34,17 @@ export class DiarioComponent implements OnInit {
 
   calcularTotales() {
     this.totales = this.registros.reduce((acc, reg) => {
-      // Usamos los nombres exactos de tu base de datos
-      const factor = (reg.cantidadSeleccionada || 0) / 100;
-      
-      acc.calorias += (reg.calorias || 0) * factor;
-      acc.proteinas += (reg.proteinas || 0) * factor;
-      acc.carbs += (reg.carbohidratos || 0) * factor;
-      acc.grasas += (reg.grasas || 0) * factor;
+      // Usamos el campo directo, Laravel ya recibe los macros calculados para esa cantidad
+      acc.calorias += Number(reg.calorias) || 0;
+      acc.proteinas += Number(reg.proteinas) || 0;
+      acc.carbs += Number(reg.carbohidratos) || 0;
+      acc.grasas += Number(reg.grasas) || 0;
       
       return acc;
     }, { calorias: 0, proteinas: 0, carbs: 0, grasas: 0 });
   }
 
-  // Para borrar, ahora deberíamos llamar a la API (lo haremos en el siguiente paso)
   borrarRegistro(index: number) {
-    // Por ahora lo quitamos visualmente, pero faltaría el DELETE en Laravel
     this.registros.splice(index, 1);
     this.calcularTotales();
   }
