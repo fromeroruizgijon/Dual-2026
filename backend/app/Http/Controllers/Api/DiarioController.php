@@ -37,4 +37,27 @@ class DiarioController extends \App\Http\Controllers\Controller
 
         return response()->json($registros);
     }
+        // Actualizar gramos (PUT)
+    // Actualizar gramos (PUT)
+    public function update(\Illuminate\Http\Request $request, $id) {
+        $registro = \App\Models\Diario::where('user_id', $request->user()->id)->findOrFail($id);
+        
+        $validated = $request->validate([
+            'cantidad' => 'required|numeric',
+            'calorias' => 'required|numeric',
+            'proteinas' => 'required|numeric',
+            'carbohidratos' => 'required|numeric',
+            'grasas' => 'required|numeric',
+        ]);
+        
+        $registro->update($validated);
+        return response()->json($registro);
+    }
+    // Borrar registro (DELETE)
+    public function destroy(\Illuminate\Http\Request $request, $id) {
+        $registro = \App\Models\Diario::where('user_id', $request->user()->id)->findOrFail($id);
+        $registro->delete();
+        
+        return response()->json(['message' => 'Eliminado correctamente']);
+    }
 }

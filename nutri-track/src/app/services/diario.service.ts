@@ -17,4 +17,11 @@ export class DiarioService {
   obtenerDiario(fecha: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${fecha}`);
   }
+  eliminarAlimento(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  actualizarAlimento(id: number, datos: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, datos);
+  }
 }
