@@ -19,6 +19,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { authInterceptor } from './interceptors/auth.interceptor';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
+import { PerfilComponent } from './perfil/perfil.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { RegistroComponent } from './pages/registro/registro.component';
     HomeComponent,
     FooterComponent,
     LoginComponent,
-    RegistroComponent
+    RegistroComponent,
+    PerfilComponent
   ],
   imports: [
     BrowserModule,

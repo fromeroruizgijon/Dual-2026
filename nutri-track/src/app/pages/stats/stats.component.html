@@ -1,4 +1,4 @@
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
   <h2 class="mb-4 text-center fw-bold text-success">📊 Mi Resumen Nutricional</h2>
 
   <div class="row justify-content-center">
@@ -7,7 +7,9 @@
         <h5 class="text-center mb-3 fw-bold text-dark">Distribución de Hoy</h5>
         
         <div *ngIf="cargandoGrafico" class="text-center my-5">
-           <div class="spinner-border text-success"></div>
+           <div class="spinner-border text-success" role="status">
+             <span class="visually-hidden">Cargando...</span>
+           </div>
         </div>
 
         <div *ngIf="!cargandoGrafico && pieChartData.datasets[0].data[0] === 0 && pieChartData.datasets[0].data[1] === 0 && pieChartData.datasets[0].data[2] === 0" class="alert alert-light text-center">
@@ -18,9 +20,32 @@
           baseChart
           [data]="pieChartData"
           [type]="pieChartType"
-          [options]="pieChartOptions">
+          [options]="pieChartOptions"
+          aria-label="Gráfico circular con la distribución de macronutrientes de hoy"
+          role="img">
         </canvas>
       </div>
     </div>
   </div>
+
+  <div class="row mt-2">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm border-0 p-4 rounded-4 h-100">
+        <h5 class="text-center mb-3 fw-bold text-dark">Resumen Semanal</h5>
+        <div class="card-body px-0 pb-0">
+          <canvas id="graficoSemana" aria-label="Gráfico de barras de calorías de los últimos 7 días" role="img"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm border-0 p-4 rounded-4 h-100">
+        <h5 class="text-center mb-3 fw-bold text-dark">Tendencia Mensual</h5>
+        <div class="card-body px-0 pb-0">
+          <canvas id="graficoMes" aria-label="Gráfico de líneas de tendencia de calorías del último mes" role="img"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>

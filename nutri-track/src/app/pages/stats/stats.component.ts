@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { DiarioService } from '../../services/diario.service';
+import Chart from 'chart.js/auto';
 
 @Component({
   selector: 'app-stats',
@@ -9,6 +10,8 @@ import { DiarioService } from '../../services/diario.service';
   styleUrl: './stats.component.scss'
 })
 export class StatsComponent implements OnInit {
+  chartSemana: any;
+  chartMes: any;
   
   public pieChartOptions: ChartConfiguration['options'] = {
     responsive: true,
@@ -32,6 +35,8 @@ export class StatsComponent implements OnInit {
 
   ngOnInit() {
     this.cargarDatosDiarios();
+    this.cargarDatosSemana();
+    this.cargarDatosMes();
   }
 
   cargarDatosDiarios() {
@@ -57,6 +62,65 @@ export class StatsComponent implements OnInit {
       error: () => {
         this.cargandoGrafico = false;
       }
+    });
+  }
+  cargarDatosSemana() {
+    this.diarioService.obtenerEstadisticas(7).subscribe({
+      next: (data) => {
+        const fechas = data.map((item: any) => item.fecha);
+        const calorias = data.map((item: any) => item.calorias);
+        this.renderizarGraficoSemana(fechas, calorias);
+      },
+      error: (err) => console.error('Error al cargar la semana', err)
+    });
+  }
+  cargarDatosMes() {
+    this.diarioService.obtenerEstadisticas(30).subscribe({
+      next: (data) => {
+        const fechas = data.map((item: any) => item.fecha);
+        const calorias = data.map((item: any) => item.calorias);
+        this.renderizarGraficoMes(fechas, calorias);
+      },
+      error: (err) => console.error('Error al cargar el mes', err)
+    });
+  }
+  renderizarGraficoSemana(etiquetas: string[], datos: number[]) {
+    const canvas = document.getElementById('graficoSemana') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    this.chartSemana = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: etiquetas,
+        datasets: [{
+          label: 'Calorías (Últimos 7 días)',
+          data: datos,
+          backgroundColor: '#66bb6a', // Tu color success de SASS
+          borderRadius: 5
+        }]
+      },
+      options: { responsive: true }
+    });
+  }
+
+  renderizarGraficoMes(etiquetas: string[], datos: number[]) {
+    const canvas = document.getElementById('graficoMes') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    this.chartMes = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: etiquetas,
+        datasets: [{
+          label: 'Tendencia Calorías (30 días)',
+          data: datos,
+          borderColor: '#2e7d32', // Tu color primary de SASS
+          fill: true,
+          backgroundColor: 'rgba(46, 125, 50, 0.1)',
+          tension: 0.4 // Hace que la línea sea curva en vez de recta
+        }]
+      },
+      options: { responsive: true }
     });
   }
 }

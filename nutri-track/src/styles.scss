@@ -1,24 +1,24 @@
-/* You can add global styles to this file, and also import other style files */
-@import "bootstrap/scss/bootstrap";
-//@import "~bootstrap-icons/font/bootstrap-icons.css";
-// 1. Definir tus propios colores (Personalización SASS)
-$primary: #2e7d32; // Un verde más oscuro y elegante
+//verde oscuro
+$primary: #2e7d32;
+//verde suave
 $success: #66bb6a;
-$bg-body: #f8f9fa;
-
-// 2. Importar Bootstrap (esto hace que use TUS variables)
+//fondo de la página
+$body-bg: #f8f9fa;
 @import "bootstrap/scss/bootstrap";
-
-// 3. Tus estilos personalizados adicionales
+//@import "bootstrap-icons/font/bootstrap-icons.css";
+//estilos propios
 body {
-  background-color: $bg-body;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .card {
-  border-radius: 15px; // Bordes más redondeados que el original
-  transition: transform 0.2s;
+  //redondear más los bordes
+  border-radius: 15px;
+  transition: transform 0.2s ease-in-out;
+  
   &:hover {
     transform: translateY(-5px);
+    //efecto de sombra al hacer hover
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
   }
 }

@@ -25,7 +25,7 @@
             <tr *ngFor="let reg of registros; let i = index">
               <td class="ps-4 text-start">
                 <div class="d-flex align-items-center">
-                  <img [src]="reg.imagen" class="rounded shadow-sm me-3" 
+                  <img [src]="reg.imagen" [alt]="'Foto de ' + reg.nombre" class="rounded shadow-sm me-3" 
                        style="width: 50px; height: 50px; object-fit: cover;">
                   <div>
                     <span class="d-block fw-bold text-dark">{{ reg.nombre }}</span>
@@ -39,8 +39,11 @@
               <td class="text-danger">{{ reg.grasas | number:'1.1-1' }}g</td>
               <td class="text-warning text-dark">{{ reg.carbohidratos | number:'1.1-1' }}g</td>
               <td>
-                <button class="btn btn-outline-danger btn-sm border-0 me-1" (click)="borrarRegistro(i)" title="Eliminar">
-                  <i class="bi bi-trash3-fill"></i>
+                <button class="btn btn-outline-primary btn-sm border-0 me-1" (click)="abrirModalEdicion(reg)" aria-label="Editar cantidad">
+                  <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm border-0" (click)="borrarRegistro(i, reg.id)" aria-label="Eliminar alimento">
+                  <i class="bi bi-trash3-fill" aria-hidden="true"></i>
                 </button>
               </td>
             </tr>
@@ -59,4 +62,23 @@
       </button>
     </div>
   </ng-template>
+</div>
+
+<div class="modal fade" [ngClass]="{'show d-block': registroEditando}" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" *ngIf="registroEditando">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Editar {{ registroEditando.nombre }}</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body text-center">
+        <label class="form-label fw-bold">Nueva cantidad (gramos):</label>
+        <input type="number" class="form-control text-center w-50 mx-auto" [(ngModel)]="nuevaCantidad">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarEdicion()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
 </div>

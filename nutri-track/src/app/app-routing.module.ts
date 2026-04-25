@@ -8,6 +8,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { authGuard } from './guards/auth.guard';
+import { PerfilComponent } from './perfil/perfil.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -17,6 +18,7 @@ const routes: Routes = [
   { path: 'stats', component: StatsComponent, canActivate: [authGuard] },
   { path: 'dietas', component: DietasComponent, canActivate: [authGuard] },
   { path: 'diario', component: DiarioComponent, canActivate: [authGuard] },
+  { path: 'perfil', component: PerfilComponent },
   { path: '**', redirectTo: '' }
 ];
 

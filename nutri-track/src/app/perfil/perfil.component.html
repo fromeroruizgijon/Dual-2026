@@ -1,0 +1,63 @@
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      
+      <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white text-center py-3">
+          <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Mi Perfil / Contacto</h4>
+        </div>
+        
+        <div class="card-body p-4 bg-white">
+          <p class="text-muted text-center mb-4">Actualiza tus datos de usuario.</p>
+
+          <form #perfilForm="ngForm" (ngSubmit)="guardarPerfil(perfilForm)" novalidate>
+
+            <div class="mb-4">
+              <label for="nombre" class="form-label fw-bold">Nombre de usuario</label>
+              <input type="text" class="form-control" id="nombre" name="nombre"
+                     [(ngModel)]="usuario.nombre" required minlength="3"
+                     #nombre="ngModel"
+                     [ngClass]="{
+                       'is-valid': nombre.valid && (nombre.dirty || nombre.touched), 
+                       'is-invalid': nombre.invalid && (nombre.dirty || nombre.touched)
+                     }">
+              <div class="valid-feedback">¡Nombre perfecto!</div>
+              <div class="invalid-feedback">El nombre es obligatorio y debe tener al menos 3 letras.</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="email" class="form-label fw-bold">Correo electrónico</label>
+              <input type="email" class="form-control" id="email" name="email"
+                     [(ngModel)]="usuario.email" required email
+                     #email="ngModel"
+                     [ngClass]="{
+                       'is-valid': email.valid && (email.dirty || email.touched), 
+                       'is-invalid': email.invalid && (email.dirty || email.touched)
+                     }">
+              <div class="valid-feedback">Email correcto.</div>
+             <div class="invalid-feedback">Por favor, introduce un email real (ejemplo&#64;correo.com).</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="bio" class="form-label fw-bold">Sobre ti</label>
+              <textarea class="form-control" id="bio" name="bio" rows="3"
+                        [(ngModel)]="usuario.bio" required
+                        #bio="ngModel"
+                        [ngClass]="{
+                          'is-valid': bio.valid && (bio.dirty || bio.touched), 
+                          'is-invalid': bio.invalid && (bio.dirty || bio.touched)
+                        }"></textarea>
+              <div class="invalid-feedback">Por favor, escribe una breve descripción.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="perfilForm.invalid">
+              Guardar Cambios
+            </button>
+            
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

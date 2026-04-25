@@ -22,5 +22,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rutas del Diario (Solo el dueño del token puede usarlas)
     Route::post('/diario', [DiarioController::class, 'store']);
     Route::get('/diario/{fecha}', [DiarioController::class, 'getPorFecha']);
+    Route::put('/diario/{id}', [\App\Http\Controllers\Api\DiarioController::class, 'update']);
+    Route::delete('/diario/{id}', [\App\Http\Controllers\Api\DiarioController::class, 'destroy']);
+
+    Route::get('/diario/estadisticas/{dias}', [\App\Http\Controllers\Api\DiarioController::class, 'getEstadisticas']);
     
 });

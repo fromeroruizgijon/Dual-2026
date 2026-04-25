@@ -60,4 +60,28 @@ class DiarioController extends \App\Http\Controllers\Controller
         
         return response()->json(['message' => 'Eliminado correctamente']);
     }
+    // Obtener estadísticas de los últimos X días
+    public function getEstadisticas(\Illuminate\Http\Request $request, $dias) {
+        // Calculamos la fecha de hace X días
+        $fechaInicio = now()->subDays($dias)->format('Y-m-d');
+        
+        // Buscamos todos los registros desde esa fecha hasta hoy
+        $registros = \App\Models\Diario::where('user_id', $request->user()->id)
+            ->where('fecha', '>=', $fechaInicio)
+            ->orderBy('fecha', 'asc')
+            ->get()
+            ->groupBy('fecha');
+
+        $estadisticas = [];
+        
+        // Sumamos las calorías por cada día
+        foreach ($registros as $fecha => $items) {
+            $estadisticas[] = [
+                'fecha' => $fecha,
+                'calorias' => $items->sum('calorias'),
+            ];
+        }
+
+        return response()->json($estadisticas);
+    }
 }
