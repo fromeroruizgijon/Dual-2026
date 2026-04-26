@@ -9,12 +9,17 @@ import { Router } from '@angular/router';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  // Al poner 'public', podemos usar authService directamente en el HTML
   constructor(public authService: AuthService, private router: Router) {}
 
   onLogout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    // Llama al backend para invalidar el token y luego limpia localmente
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => {
+        // Si el servidor falla, limpiamos la sesión local igualmente
+        this.authService.limpiarSesion();
+        this.router.navigate(['/login']);
+      }
+    });
   }
-
 }

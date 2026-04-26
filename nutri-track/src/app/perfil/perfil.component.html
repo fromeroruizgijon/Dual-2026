@@ -50,8 +50,8 @@
               <div class="invalid-feedback">Por favor, escribe una breve descripción.</div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="perfilForm.invalid">
-              Guardar Cambios
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="perfilForm.invalid || guardando">
+              {{ guardando ? 'Guardando...' : 'Guardar Cambios' }}
             </button>
             
           </form>

@@ -20,6 +20,7 @@ import { authInterceptor } from './interceptors/auth.interceptor';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { PerfilComponent } from './perfil/perfil.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 @NgModule({
   declarations: [
@@ -34,14 +35,14 @@ import { PerfilComponent } from './perfil/perfil.component';
     FooterComponent,
     LoginComponent,
     RegistroComponent,
-    PerfilComponent
+    PerfilComponent,
+    AdminComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    BaseChartDirective,
-    FormsModule
+    BaseChartDirective
   ],
   providers: [
     provideHttpClient(withInterceptors([authInterceptor])),

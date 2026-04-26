@@ -30,15 +30,14 @@ class DiarioController extends \App\Http\Controllers\Controller
 
     public function getPorFecha($fecha, \Illuminate\Http\Request $request)
     {
-        // OJO: He cambiado el "1" duro por el ID del usuario real para que te funcione a futuro
         $registros = \App\Models\Diario::where('user_id', $request->user()->id)
             ->where('fecha', $fecha)
             ->get();
 
         return response()->json($registros);
     }
-        // Actualizar gramos (PUT)
-    // Actualizar gramos (PUT)
+
+    // Actualizar cantidad y recalcular macros (PUT)
     public function update(\Illuminate\Http\Request $request, $id) {
         $registro = \App\Models\Diario::where('user_id', $request->user()->id)->findOrFail($id);
         

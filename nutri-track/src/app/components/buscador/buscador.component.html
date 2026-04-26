@@ -54,6 +54,14 @@
         </div>
 
         <div class="modal-body p-4">
+          
+          <div *ngIf="alertaDieta" class="alert alert-danger d-flex align-items-center mb-4 shadow-sm rounded-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div class="fw-bold">
+              {{ alertaDieta }}
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-md-5 text-center mb-4 mb-md-0">
               <img [src]="alimentoSeleccionado.imagen" class="img-fluid rounded shadow-sm mb-3">

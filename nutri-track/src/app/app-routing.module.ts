@@ -8,7 +8,9 @@ import { HomeComponent } from './pages/home/home.component';
 import { LoginComponent } from './pages/login/login.component';
 import { RegistroComponent } from './pages/registro/registro.component';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { PerfilComponent } from './perfil/perfil.component';
+import { AdminComponent } from './pages/admin/admin.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -18,7 +20,10 @@ const routes: Routes = [
   { path: 'stats', component: StatsComponent, canActivate: [authGuard] },
   { path: 'dietas', component: DietasComponent, canActivate: [authGuard] },
   { path: 'diario', component: DiarioComponent, canActivate: [authGuard] },
-  { path: 'perfil', component: PerfilComponent },
+  // Admin protegido con adminGuard: requiere token válido Y is_admin = true
+  { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
+  // Perfil requiere estar logueado
+  { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];
 

@@ -1,9 +1,61 @@
 <div class="container mt-4 mb-5">
-  <h2 class="mb-4 text-center fw-bold text-success">📊 Mi Resumen Nutricional</h2>
+  <h2 class="mb-4 text-center fw-bold text-success">📊 Mi Panel Nutricional</h2>
+
+  <div class="row mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card bg-success text-white border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center">
+          <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-calendar-day me-2"></i>Calorías Hoy</h6>
+          <h2 class="fw-bold mb-0">{{ kpiHoyTotal | number:'1.0-0' }} <small class="fs-6">kcal</small></h2> 
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card bg-primary text-white border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center">
+          <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-graph-up me-2"></i>Media Semanal</h6>
+          <h2 class="fw-bold mb-0">{{ kpiSemanaPromedio | number:'1.0-0' }} <small class="fs-6">kcal/día</small></h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card bg-dark text-white border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body text-center">
+          <h6 class="text-white-50 text-uppercase fw-bold"><i class="bi bi-calendar-month me-2"></i>Total Mensual</h6>
+          <h2 class="fw-bold mb-0">{{ kpiMesTotal | number:'1.0-0' }} <small class="fs-6">kcal</small></h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs justify-content-center mb-4 border-bottom-0 gap-2">
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 shadow-sm" style="cursor: pointer;"
+         [ngClass]="{'active bg-success text-white border-success': tabActiva === 'hoy', 'bg-white text-secondary': tabActiva !== 'hoy'}" 
+         (click)="cambiarTab('hoy')">
+         Distribución de Hoy
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 shadow-sm" style="cursor: pointer;"
+         [ngClass]="{'active bg-success text-white border-success': tabActiva === 'semana', 'bg-white text-secondary': tabActiva !== 'semana'}" 
+         (click)="cambiarTab('semana')">
+         Evolución Semanal
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link rounded-pill px-4 shadow-sm" style="cursor: pointer;"
+         [ngClass]="{'active bg-success text-white border-success': tabActiva === 'mes', 'bg-white text-secondary': tabActiva !== 'mes'}" 
+         (click)="cambiarTab('mes')">
+         Tendencia Mensual
+      </a>
+    </li>
+  </ul>
 
   <div class="row justify-content-center">
-    <div class="col-md-6 mb-4">
-      <div class="card shadow border-0 p-4 rounded-4 h-100">
+    <div class="col-md-8">
+      
+      <div class="card shadow border-0 p-4 rounded-4" [hidden]="tabActiva !== 'hoy'">
         <h5 class="text-center mb-3 fw-bold text-dark">Distribución de Hoy</h5>
         
         <div *ngIf="cargandoGrafico" class="text-center my-5">
@@ -25,26 +77,17 @@
           role="img">
         </canvas>
       </div>
-    </div>
-  </div>
 
-  <div class="row mt-2">
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm border-0 p-4 rounded-4 h-100">
+      <div class="card shadow border-0 p-4 rounded-4" [hidden]="tabActiva !== 'semana'">
         <h5 class="text-center mb-3 fw-bold text-dark">Resumen Semanal</h5>
-        <div class="card-body px-0 pb-0">
-          <canvas id="graficoSemana" aria-label="Gráfico de barras de calorías de los últimos 7 días" role="img"></canvas>
-        </div>
+        <canvas id="graficoSemana" aria-label="Gráfico de barras de calorías semanales" role="img"></canvas>
       </div>
-    </div>
 
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm border-0 p-4 rounded-4 h-100">
+      <div class="card shadow border-0 p-4 rounded-4" [hidden]="tabActiva !== 'mes'">
         <h5 class="text-center mb-3 fw-bold text-dark">Tendencia Mensual</h5>
-        <div class="card-body px-0 pb-0">
-          <canvas id="graficoMes" aria-label="Gráfico de líneas de tendencia de calorías del último mes" role="img"></canvas>
-        </div>
+        <canvas id="graficoMes" aria-label="Gráfico de líneas de tendencia mensual" role="img"></canvas>
       </div>
+
     </div>
   </div>
 

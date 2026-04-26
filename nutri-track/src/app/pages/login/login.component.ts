@@ -17,13 +17,10 @@ export class LoginComponent {
 
   onLogin() {
     this.authService.login(this.credenciales).subscribe({
-      next: (res) => {
-        console.log('Login correcto!', res);
-        // Redirigimos al diario una vez logueado
+      next: () => {
         this.router.navigate(['/diario']);
       },
-      error: (err) => {
-        console.error('Error en el login', err);
+      error: () => {
         alert('Credenciales incorrectas. Inténtalo de nuevo.');
       }
     });

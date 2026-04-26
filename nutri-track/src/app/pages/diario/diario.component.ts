@@ -29,8 +29,8 @@ export class DiarioComponent implements OnInit {
         this.registros = data;
         this.calcularTotales();
       },
-      error: (err) => {
-        console.error('Error al cargar el diario desde Laravel:', err);
+      error: () => {
+        alert('No se pudo cargar el diario. Comprueba la conexión con el servidor.');
       }
     });
   }
@@ -52,7 +52,7 @@ export class DiarioComponent implements OnInit {
           this.registros.splice(index, 1);
           this.calcularTotales();
         },
-        error: (err) => alert('Error al borrar en Laravel')
+        error: () => alert('Error al borrar el registro')
       });
     }
   }

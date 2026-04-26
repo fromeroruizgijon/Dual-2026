@@ -18,13 +18,11 @@ export class RegistroComponent {
 
   onRegistro() {
     this.authService.registrar(this.usuario).subscribe({
-      next: (res) => {
-        console.log('Usuario registrado y logueado!', res);
+      next: () => {
         alert('¡Cuenta creada con éxito! Bienvenido.');
         this.router.navigate(['/diario']);
       },
       error: (err) => {
-        console.error('Error en el registro', err);
         // Manejo básico de errores (ej: email ya existe)
         if (err.status === 422) {
           alert('El email ya está registrado o los datos son inválidos.');

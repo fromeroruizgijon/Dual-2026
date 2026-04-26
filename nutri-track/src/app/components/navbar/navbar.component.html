@@ -24,6 +24,12 @@
           <li class="nav-item">
             <a class="nav-link" routerLink="/stats" routerLinkActive="active">Estadísticas</a>
           </li>
+
+          <li class="nav-item ms-lg-2" *ngIf="authService.esAdmin()">
+            <a class="nav-link fw-bold text-warning" routerLink="/admin" routerLinkActive="active">
+              <i class="bi bi-shield-lock-fill"></i> Panel Admin
+            </a>
+          </li>
           
           <li class="nav-item ms-lg-2">
             <a class="nav-link fw-bold text-white" routerLink="/perfil" routerLinkActive="active">
