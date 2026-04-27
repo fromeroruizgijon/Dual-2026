@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  standalone: false, // O true si usas standalone
+  standalone: false,
   templateUrl: './login.component.html'
 })
 export class LoginComponent {

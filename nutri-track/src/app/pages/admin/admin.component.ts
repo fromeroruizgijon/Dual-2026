@@ -8,12 +8,10 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './admin.component.scss'
 })
 export class AdminComponent implements OnInit {
-
   usuarios: any[] = [];
   cargando: boolean = true;
   private apiUrl = 'http://127.0.0.1:8000/api/admin/usuarios';
 
-  // El authInterceptor añade el token automáticamente; no hace falta gestionar headers aquí
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {

@@ -24,7 +24,6 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
-        // Incluimos is_admin para que el frontend sepa si mostrar el panel admin
         return response()->json(['token' => $token, 'user' => $user]);
     }
 
@@ -35,12 +34,10 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Incluimos is_admin para que el frontend sepa si mostrar el panel admin
         return response()->json(['token' => $token, 'user' => $user]);
     }
 
-    // Invalida el token actual en el servidor (logout real)
+    // borra el token de la bd, no solo del navegador
     public function logout(Request $request) {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Sesión cerrada correctamente']);

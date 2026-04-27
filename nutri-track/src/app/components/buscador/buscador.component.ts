@@ -6,131 +6,121 @@ import { DiarioService } from '../../services/diario.service';
 @Component({
   selector: 'app-buscador',
   standalone: false,
-  templateUrl: './buscador.component.html',
-  styleUrl: './buscador.component.scss'
+  templateUrl: './buscador.component.html'
 })
 export class BuscadorComponent implements OnInit {
   resultados: Alimento[] = [];    
   cargando: boolean = false;      
   cargandoDetalles: boolean = false;
   alimentoSeleccionado: Alimento | null = null;
+  
+  terminoBusqueda: string = '';
   categoriaActiva: string = '';
-
-  // NUEVAS VARIABLES PARA LAS DIETAS
   dietaUsuario: string = ''; 
   alertaDieta: string | null = null;
+  
+  // Para sustituir los alerts
+  mensajeExito: boolean = false;
+  mensajeError: string | null = null;
+
+  categorias: string[] = ['Beef', 'Chicken', 'Dessert', 'Lamb', 'Miscellaneous', 'Pasta', 'Pork', 'Seafood', 'Side', 'Starter', 'Vegan', 'Vegetarian', 'Breakfast'];
+  paises: string[] = ['American', 'British', 'Canadian', 'Chinese', 'Croatian', 'Dutch', 'Egyptian', 'French', 'Greek', 'Indian', 'Irish', 'Italian', 'Jamaican', 'Japanese', 'Kenyan', 'Malaysian', 'Mexican', 'Moroccan', 'Polish', 'Portuguese', 'Russian', 'Spanish', 'Thai', 'Tunisian', 'Turkish', 'Vietnamese'];
 
   ingredientesPrincipales = [
-    { nombre: 'Pollo', busqueda: 'chicken_breast', icono: '🍗' },
-    { nombre: 'Salmón', busqueda: 'salmon', icono: '🍣' },
-    { nombre: 'Huevo', busqueda: 'egg', icono: '🥚' },
-    { nombre: 'Cerdo', busqueda: 'pork', icono: '🥓' },
-    { nombre: 'Aguacate', busqueda: 'avocado', icono: '🥑' },
-    { nombre: 'Ajo', busqueda: 'garlic', icono: '🧄' }
+    { nombre: 'Pollo', busqueda: 'chicken_breast', icono: 'bi-egg-fill' },
+    { nombre: 'Salmón', busqueda: 'salmon', icono: 'bi-water' },
+    { nombre: 'Huevo', busqueda: 'egg', icono: 'bi-egg' },
+    { nombre: 'Cerdo', busqueda: 'pork', icono: 'bi-piggy-bank' },
+    { nombre: 'Aguacate', busqueda: 'avocado', icono: 'bi-tree' },
+    { nombre: 'Ajo', busqueda: 'garlic', icono: 'bi-circle' }
   ];
 
-  constructor(
-    private comidaService: ComidaService,
-    private diarioService: DiarioService
-  ) {}
+  constructor(private comidaService: ComidaService, private diarioService: DiarioService) {}
 
   ngOnInit() {
-    // AHORA SÍ: Leemos la misma variable que guarda tu página de dietas
     this.dietaUsuario = localStorage.getItem('miDieta') || 'ninguna';
   }
 
-  buscarCategoria(ingrediente: string) {
+  buscarPorNombre() {
+    if (!this.terminoBusqueda.trim()) return;
+    this.ejecutarBusqueda(this.comidaService.buscarPorNombre(this.terminoBusqueda));
+  }
+
+  buscarPorFiltroCat(cat: string) {
+    if (!cat) return;
+    this.ejecutarBusqueda(this.comidaService.buscarPorCategoria(cat));
+  }
+
+  buscarPorFiltroPais(pais: string) {
+    if (!pais) return;
+    this.ejecutarBusqueda(this.comidaService.buscarPorPais(pais));
+  }
+
+  buscarRapida(ing: string) {
+    this.categoriaActiva = ing;
+    this.ejecutarBusqueda(this.comidaService.buscarPorIngrediente(ing));
+  }
+
+  private ejecutarBusqueda(obs: any) {
     this.cargando = true;
     this.resultados = [];
-    this.categoriaActiva = ingrediente;
-
-    this.comidaService.buscarPorIngrediente(ingrediente).subscribe(data => {
-      this.resultados = data;
-      this.cargando = false;
+    obs.subscribe({
+      next: (data: any) => {
+        this.resultados = data;
+        this.cargando = false;
+      },
+      error: () => {
+        this.cargando = false;
+      }
     });
   }
 
   verDetalles(alimento: Alimento) {
     this.cargandoDetalles = true;
-    this.alertaDieta = null; // Reseteamos la alerta anterior
+    this.alertaDieta = null;
+    this.mensajeExito = false;
+    this.mensajeError = null;
 
-    if(alimento.id) {
-        this.comidaService.obtenerDetalles(alimento.id).subscribe(detalle => {
-          if (detalle) {
-            this.alimentoSeleccionado = detalle;
-            // LLAMAMOS A LA FUNCIÓN DE DETECCIÓN AQUÍ 👇
-            this.comprobarAlertasDieta(detalle); 
-          }
-          this.cargandoDetalles = false;
-        });
-    }
+    this.comidaService.obtenerDetalles(alimento.id!).subscribe(detalle => {
+      if (detalle) {
+        this.alimentoSeleccionado = detalle;
+        this.comprobarAlertasDieta(detalle); 
+      }
+      this.cargandoDetalles = false;
+    });
   }
 
-  // 🕵️ LÓGICA DE DETECCIÓN DE ALÉRGENOS/DIETAS
   comprobarAlertasDieta(alimento: Alimento) {
     if (!this.dietaUsuario || this.dietaUsuario === 'ninguna') return;
+    let texto = `${alimento.nombre} ${alimento.categoria} ${alimento.listaIngredientes?.join(' ')}`.toLowerCase();
 
-    // 1. Empezamos con el nombre y la categoría
-    let textoAlimento = `${alimento.nombre} ${alimento.categoria}`.toLowerCase();
+    const dietas: any = {
+      vegana: { p: ['chicken', 'beef', 'pork', 'salmon', 'egg', 'milk', 'cheese', 'honey', 'fish', 'meat', 'butter', 'cream', 'gelatin'], m: 'No apto para dieta Vegana.' },
+      vegetariana: { p: ['chicken', 'beef', 'pork', 'salmon', 'fish', 'meat', 'gelatin'], m: 'No apto para dieta Vegetariana.' },
+      singluten: { p: ['wheat', 'flour', 'bread', 'pasta', 'seitan', 'barley', 'pastry', 'noodles', 'spaghetti', 'macaroni', 'couscous'], m: 'Contiene Gluten.' },
+      sinlactosa: { p: ['milk', 'cheese', 'cream', 'butter', 'yogurt', 'gruyere', 'parmesan', 'mascarpone', 'mozzarella'], m: 'Contiene lácteos.' }
+    };
 
-    // 2. ¡EL ARREGLO! Añadimos TODOS los ingredientes a la batidora de texto
-    if (alimento.listaIngredientes && alimento.listaIngredientes.length > 0) {
-      const todosLosIngredientes = alimento.listaIngredientes.join(' ').toLowerCase();
-      textoAlimento += ` ${todosLosIngredientes}`;
-    }
-
-    if (this.dietaUsuario === 'vegana') {
-      const prohibidosVegano = ['chicken', 'beef', 'pork', 'salmon', 'egg', 'milk', 'cheese', 'honey', 'fish', 'meat', 'butter', 'cream', 'gelatin'];
-      const tieneCarne = prohibidosVegano.some(ing => textoAlimento.includes(ing));
-      if (tieneCarne) {
-        this.alertaDieta = '⚠️ No apto para dieta Vegana (Contiene ingredientes de origen animal).';
-      }
-    }
-
-    if (this.dietaUsuario === 'vegetariana') {
-      const prohibidosVegetariano = ['chicken', 'beef', 'pork', 'salmon', 'fish', 'meat', 'gelatin'];
-      const tieneCarne = prohibidosVegetariano.some(ing => textoAlimento.includes(ing));
-      if (tieneCarne) {
-        this.alertaDieta = '⚠️ No apto para dieta Vegetariana (Contiene carne o pescado).';
-      }
-    }
-
-    if (this.dietaUsuario === 'singluten') {
-      // Hemos añadido más trampas de TheMealDB: pastry, noodles, spaghetti, macaroni...
-      const prohibidosGluten = ['wheat', 'flour', 'bread', 'pasta', 'seitan', 'barley', 'pastry', 'noodles', 'spaghetti', 'macaroni', 'couscous'];
-      const tieneGluten = prohibidosGluten.some(ing => textoAlimento.includes(ing));
-      if (tieneGluten) {
-        this.alertaDieta = '🛑 Riesgo Celíaco: Este producto parece contener Gluten.';
-      }
-    }
-
-    if (this.dietaUsuario === 'sinlactosa') {
-      // Hemos añadido: gruyere, parmesan, mascarpone...
-      const prohibidosLactosa = ['milk', 'cheese', 'cream', 'butter', 'yogurt', 'gruyere', 'parmesan', 'mascarpone', 'mozzarella'];
-      const tieneLactosa = prohibidosLactosa.some(ing => textoAlimento.includes(ing));
-      if (tieneLactosa) {
-        this.alertaDieta = '⚠️ Riesgo Intolerancia: Este producto contiene lácteos.';
-      }
+    const actual = dietas[this.dietaUsuario];
+    if (actual && actual.p.some((ing: string) => texto.includes(ing))) {
+      this.alertaDieta = actual.m;
     }
   }
 
   aniadirAlDiario() {
-    // Guardamos en local para que TypeScript sepa que no es null a partir de aquí
     const alimento = this.alimentoSeleccionado;
-    const cantidad = alimento?.cantidadSeleccionada;
-    if (!alimento || !cantidad || cantidad <= 0) {
-      alert('Por favor, introduce una cantidad en gramos mayor que 0');
+    if (!alimento || !alimento.cantidadSeleccionada || alimento.cantidadSeleccionada <= 0) {
+      this.mensajeError = 'Introduce una cantidad válida.';
       return;
     }
 
-    const factor = cantidad / 100;
-
+    const factor = alimento.cantidadSeleccionada / 100;
     const registro = {
       alimento_id: alimento.id,
       nombre: alimento.nombre,
       marca: alimento.categoria,
       imagen: alimento.imagen,
-      cantidad: cantidad,
+      cantidad: alimento.cantidadSeleccionada,
       calorias: alimento.calorias * factor,
       proteinas: alimento.proteinas * factor,
       carbohidratos: alimento.carbohidratos * factor,
@@ -141,10 +131,10 @@ export class BuscadorComponent implements OnInit {
 
     this.diarioService.guardarAlimento(registro).subscribe({
       next: () => { 
-        alert('¡Añadido a tu diario con éxito!'); 
-        this.alimentoSeleccionado = null; 
+        this.mensajeExito = true;
+        setTimeout(() => this.alimentoSeleccionado = null, 1500);
       },
-      error: () => alert('Error de conexión con Laravel')
+      error: () => this.mensajeError = 'Error al guardar.'
     });
   }
 }

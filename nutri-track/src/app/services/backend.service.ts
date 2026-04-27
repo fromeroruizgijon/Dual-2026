@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class BackendService {
-  // La URL donde está corriendo tu Laravel
+  // La URL donde está corriendo Laravel
   private apiUrl = 'http://127.0.0.1:8000/api';
 
   constructor(private http: HttpClient) { }

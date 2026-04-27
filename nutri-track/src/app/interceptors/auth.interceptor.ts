@@ -1,18 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  
-  // --- EL TRUCO (EL BYPASS) ---
-  // Si la petición va a la API externa de comida, que pase SIN TOKEN.
+  //si la petición va a la api no se le pasa token por qué no es un parámetro válido
   if (req.url.includes('themealdb.com')) {
     return next(req);
   }
-  // ----------------------------
-
-  // 1. Intentamos coger el token del almacenamiento local (Para Laravel)
+  //se recoge el token del localstorage
   const token = localStorage.getItem('auth_token');
-
-  // 2. Si el token existe, clonamos la petición y le añadimos la cabecera Authorization
+  // si el token existe se clona y se añade a la cabecera
   if (token) {
     const authReq = req.clone({
       setHeaders: {
@@ -21,7 +16,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
     return next(authReq);
   }
-
-  // 3. Si no hay token, la petición sigue su curso normal
+  // si no hay token se envia la petición normal
   return next(req);
 };

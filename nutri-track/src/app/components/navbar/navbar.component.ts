@@ -12,11 +12,10 @@ export class NavbarComponent {
   constructor(public authService: AuthService, private router: Router) {}
 
   onLogout() {
-    // Llama al backend para invalidar el token y luego limpia localmente
+    // si el servidor falla se limpia la sesión local igualmente para no dejar al usuario bloqueado
     this.authService.logout().subscribe({
       next: () => this.router.navigate(['/login']),
       error: () => {
-        // Si el servidor falla, limpiamos la sesión local igualmente
         this.authService.limpiarSesion();
         this.router.navigate(['/login']);
       }

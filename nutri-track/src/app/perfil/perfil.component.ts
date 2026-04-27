@@ -10,19 +10,12 @@ import { HttpClient } from '@angular/common/http';
 export class PerfilComponent implements OnInit {
   private apiUrl = 'http://127.0.0.1:8000/api';
 
-  usuario = {
-    nombre: '',
-    email: '',
-    bio: ''
-  };
-
+  usuario = { nombre: '', email: '', bio: '' };
   guardando = false;
 
-  // El authInterceptor añade el token; solo necesitamos HttpClient
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    // Carga los datos actuales del usuario desde el backend al entrar en la página
     this.http.get<any>(`${this.apiUrl}/user`).subscribe({
       next: (user) => {
         this.usuario.nombre = user.name || '';
