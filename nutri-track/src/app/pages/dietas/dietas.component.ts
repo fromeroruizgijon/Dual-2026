@@ -12,12 +12,36 @@ export class DietasComponent implements OnInit {
 
   // Lista de dietas disponibles para generar el HTML más limpio
   opcionesDietas = [
-    { id: 'ninguna', titulo: 'Estándar', icono: '🍽️', desc: 'Sin restricciones específicas.' },
-    { id: 'vegana', titulo: 'Vegana', icono: '🌱', desc: 'Excluye todos los productos de origen animal.' },
-    { id: 'vegetariana', titulo: 'Vegetariana', icono: '🥛', desc: 'Permite lácteos y huevos, pero no carne.' },
-    { id: 'singluten', titulo: 'Sin Gluten', icono: '🌾', desc: 'Apto para celíacos o intolerantes al gluten.' },
-    { id: 'sinlactosa', titulo: 'Sin Lactosa', icono: '🧀', desc: 'Excluye productos con lactosa o derivados lácteos.' },
-    { id: 'sinpalma', titulo: 'Sin Aceite de Palma', icono: '🌴', desc: 'Productos libres de aceite de palma por salud o ecología.' }
+    {
+      id: 'ninguna', titulo: 'Estándar', icono: 'bi-basket',
+      desc: 'Sin restricciones específicas. Todas las recetas son aptas.',
+      excluye: [] as string[]
+    },
+    {
+      id: 'vegana', titulo: 'Vegana', icono: 'bi-flower2',
+      desc: 'Excluye todos los productos de origen animal.',
+      excluye: ['Carne', 'Aves', 'Pescado', 'Huevo', 'Lácteos', 'Miel', 'Gelatina']
+    },
+    {
+      id: 'vegetariana', titulo: 'Vegetariana', icono: 'bi-egg-fried',
+      desc: 'Permite lácteos y huevos, pero excluye toda la carne.',
+      excluye: ['Carne', 'Aves', 'Pescado', 'Marisco', 'Gelatina']
+    },
+    {
+      id: 'singluten', titulo: 'Sin Gluten', icono: 'bi-slash-circle',
+      desc: 'Apto para celíacos o intolerantes al gluten.',
+      excluye: ['Trigo', 'Harina', 'Pan', 'Pasta', 'Cebada', 'Seitán', 'Cuscús']
+    },
+    {
+      id: 'sinlactosa', titulo: 'Sin Lactosa', icono: 'bi-cup-hot',
+      desc: 'Excluye lácteos y todos sus derivados.',
+      excluye: ['Leche', 'Queso', 'Nata', 'Mantequilla', 'Yogur', 'Mozzarella']
+    },
+    {
+      id: 'sinpalma', titulo: 'Sin Aceite de Palma', icono: 'bi-tree',
+      desc: 'Productos libres de aceite de palma por salud o ecología.',
+      excluye: ['Aceite de palma', 'Palm oil']
+    }
   ];
 
   ngOnInit(): void {

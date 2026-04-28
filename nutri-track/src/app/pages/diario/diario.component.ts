@@ -12,6 +12,40 @@ export class DiarioComponent implements OnInit {
   totales = { calorias: 0, proteinas: 0, carbs: 0, grasas: 0 };
   registroEditando: any = null;
   nuevaCantidad: number = 0;
+  fechaActual: Date = new Date();
+
+  get fechaFormateada(): string {
+    const d = this.fechaActual;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  get fechaDisplay(): string {
+    return this.fechaActual.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  get esHoy(): boolean {
+    const hoy = new Date();
+    const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    return this.fechaFormateada === hoyStr;
+  }
+
+  irDiaAnterior() {
+    const nueva = new Date(this.fechaActual);
+    nueva.setDate(nueva.getDate() - 1);
+    this.fechaActual = nueva;
+    this.cargarDiarioDesdeBackend();
+  }
+
+  irDiaSiguiente() {
+    if (this.esHoy) return;
+    const nueva = new Date(this.fechaActual);
+    nueva.setDate(nueva.getDate() + 1);
+    this.fechaActual = nueva;
+    this.cargarDiarioDesdeBackend();
+  }
 
   constructor(private diarioService: DiarioService) {}
 
@@ -20,8 +54,8 @@ export class DiarioComponent implements OnInit {
   }
 
   cargarDiarioDesdeBackend() {
-    const hoy = new Date().toISOString().split('T')[0];
-    this.diarioService.obtenerDiario(hoy).subscribe({
+    this.registros = [];
+    this.diarioService.obtenerDiario(this.fechaFormateada).subscribe({
       next: (data) => {
         this.registros = data;
         this.calcularTotales();

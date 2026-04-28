@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Api\DiarioController;
 use App\Http\Controllers\Api\AuthController;
 
@@ -21,6 +22,23 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
         $request->user()->update($validated);
         return response()->json($request->user());
+    });
+
+    Route::put('/user/password', function (Request $request) {
+        $request->validate([
+            'password_actual'              => 'required',
+            'password_nuevo'               => 'required|min:6|confirmed',
+        ]);
+
+        if (!Hash::check($request->password_actual, $request->user()->password)) {
+            return response()->json(['message' => 'La contraseña actual no es correcta'], 422);
+        }
+
+        $request->user()->update([
+            'password' => Hash::make($request->password_nuevo),
+        ]);
+
+        return response()->json(['message' => 'Contraseña actualizada correctamente']);
     });
 
     Route::post('/logout', [AuthController::class, 'logout']);

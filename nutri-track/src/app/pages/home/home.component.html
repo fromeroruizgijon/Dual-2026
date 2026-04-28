@@ -2,8 +2,8 @@
 <div class="bg-success text-white py-5 mb-5" style="border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(25, 135, 84, 0.2);">
   <div class="container text-center py-5">
     <h1 class="display-3 fw-bold mb-4">Tu nutrición, <br>bajo control.</h1>
-    <p class="lead mb-4 opacity-75 max-w-50 mx-auto">
-      Descubre la información nutricional de miles de productos, registra tus comidas diarias y alcanza tus objetivos de salud sin complicaciones.
+    <p class="lead mb-4 opacity-75 mx-auto" style="max-width: 600px;">
+      Explora miles de recetas de todo el mundo, registra lo que comes cada día y sigue tu evolución nutricional con gráficos claros.
     </p>
     <div class="d-flex justify-content-center gap-3 mt-4">
       <button class="btn btn-light btn-lg text-success fw-bold px-4 rounded-pill shadow" routerLink="/buscar">
@@ -21,37 +21,37 @@
 
   <div class="row g-4 text-center">
     <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.3s ease;">
+      <div class="card h-100 border-0 shadow-sm" style="cursor: pointer;" routerLink="/buscar">
         <div class="card-body p-4">
           <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-            <i class="bi bi-upc-scan fs-1"></i>
+            <i class="bi bi-globe2 fs-1"></i>
           </div>
           <h4 class="fw-bold">1. Busca</h4>
-          <p class="text-muted">Accede a una base de datos con miles de productos reales y analiza su Nutriscore y macronutrientes al instante.</p>
+          <p class="text-muted">Encuentra recetas de todo el mundo filtrando por nombre, categoría, país de origen o ingrediente principal.</p>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.3s ease;">
+      <div class="card h-100 border-0 shadow-sm" style="cursor: pointer;" routerLink="/diario">
         <div class="card-body p-4">
           <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
             <i class="bi bi-journal-check fs-1"></i>
           </div>
           <h4 class="fw-bold">2. Registra</h4>
-          <p class="text-muted">Añade los alimentos a tu diario personal con las cantidades exactas para llevar un control riguroso de tus calorías.</p>
+          <p class="text-muted">Añade las recetas a tu diario diario indicando los gramos consumidos. Los macronutrientes se calculan automáticamente.</p>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
-      <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.3s ease;">
+      <div class="card h-100 border-0 shadow-sm" style="cursor: pointer;" routerLink="/stats">
         <div class="card-body p-4">
           <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
             <i class="bi bi-pie-chart fs-1"></i>
           </div>
           <h4 class="fw-bold">3. Analiza</h4>
-          <p class="text-muted">Visualiza tu progreso con gráficos intuitivos que te ayudarán a equilibrar tus macros y mantener tu dieta elegida.</p>
+          <p class="text-muted">Consulta la distribución de tus macros de hoy, la evolución semanal y la tendencia mensual de calorías en un solo panel.</p>
         </div>
       </div>
     </div>
@@ -61,9 +61,9 @@
 <div class="container mb-5">
   <div class="bg-light rounded-4 p-5 text-center border shadow-sm">
     <h3 class="fw-bold mb-3">¿Tienes alguna restricción alimentaria?</h3>
-    <p class="text-muted mb-4">Configura tu perfil para que te avisemos si un producto no encaja en tu dieta (Vegana, Sin Gluten, etc.).</p>
+    <p class="text-muted mb-4">Selecciona tu tipo de dieta y te avisaremos si una receta contiene ingredientes no aptos para ti — Vegana, Sin Gluten, Sin Lactosa y más.</p>
     <button class="btn btn-outline-success px-4 rounded-pill" routerLink="/dietas">
-      <i class="bi bi-person-lines-fill me-2"></i> Configurar mi dieta
+      <i class="bi bi-sliders me-2"></i> Configurar mis preferencias
     </button>
   </div>
 </div>

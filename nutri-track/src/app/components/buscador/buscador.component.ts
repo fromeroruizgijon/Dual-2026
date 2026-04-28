@@ -16,8 +16,9 @@ export class BuscadorComponent implements OnInit {
   
   terminoBusqueda: string = '';
   categoriaActiva: string = '';
-  dietaUsuario: string = ''; 
+  dietaUsuario: string = '';
   alertaDieta: string | null = null;
+  hasBuscado: boolean = false;
   
   // Para sustituir los alerts
   mensajeExito: boolean = false;
@@ -63,6 +64,7 @@ export class BuscadorComponent implements OnInit {
 
   private ejecutarBusqueda(obs: any) {
     this.cargando = true;
+    this.hasBuscado = true;
     this.resultados = [];
     obs.subscribe({
       next: (data: any) => {
