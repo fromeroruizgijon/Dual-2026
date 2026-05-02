@@ -80,12 +80,12 @@
 
       <div class="card shadow border-0 p-4 rounded-4" [hidden]="tabActiva !== 'semana'">
         <h5 class="text-center mb-3 fw-bold text-dark">Resumen Semanal</h5>
-        <canvas id="graficoSemana" aria-label="Gráfico de barras de calorías semanales" role="img"></canvas>
+        <canvas id="graficoSemana" aria-label="Gráfico de barras de calorías semanales" role="img">Gráfico de barras con las calorías de los últimos 7 días.</canvas>
       </div>
 
       <div class="card shadow border-0 p-4 rounded-4" [hidden]="tabActiva !== 'mes'">
         <h5 class="text-center mb-3 fw-bold text-dark">Tendencia Mensual</h5>
-        <canvas id="graficoMes" aria-label="Gráfico de líneas de tendencia mensual" role="img"></canvas>
+        <canvas id="graficoMes" aria-label="Gráfico de líneas de tendencia mensual" role="img">Gráfico de líneas con la tendencia de calorías de los últimos 30 días.</canvas>
       </div>
 
     </div>

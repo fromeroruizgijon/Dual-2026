@@ -65,13 +65,11 @@ export class StatsComponent implements OnInit {
           p += Number(reg.proteinas) || 0;
           c += Number(reg.carbohidratos) || 0;
           g += Number(reg.grasas) || 0;
-          cal += Number(reg.calorias) || 0; // Sumamos calorías para el KPI
+          cal += Number(reg.calorias) || 0;
         });
 
         this.pieChartData.datasets[0].data = [p, c, g];
-        this.kpiHoyTotal = cal; // Guardamos el total de hoy
-        
-        // Truco para forzar que Chart.js se repinte
+        this.kpiHoyTotal = cal;
         this.pieChartData = { ...this.pieChartData };
         this.cargandoGrafico = false;
       },

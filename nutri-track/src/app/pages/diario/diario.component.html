@@ -82,8 +82,8 @@
         <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
       </div>
       <div class="modal-body text-center">
-        <label class="form-label fw-bold">Nueva cantidad (gramos):</label>
-        <input type="number" class="form-control text-center w-50 mx-auto" [(ngModel)]="nuevaCantidad">
+        <label class="form-label fw-bold" for="nueva-cantidad">Nueva cantidad (gramos):</label>
+        <input type="number" id="nueva-cantidad" class="form-control text-center w-50 mx-auto" [(ngModel)]="nuevaCantidad">
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>

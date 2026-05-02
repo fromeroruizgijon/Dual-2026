@@ -103,26 +103,26 @@
           <div *ngIf="errorPass" class="alert alert-danger py-2 small">{{ errorPass }}</div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">Contraseña actual</label>
+            <label class="form-label fw-bold small" for="pass-actual">Contraseña actual</label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-              <input type="password" class="form-control" [(ngModel)]="password.actual" placeholder="••••••••">
+              <input type="password" id="pass-actual" class="form-control" [(ngModel)]="password.actual" placeholder="••••••••">
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-bold small">Nueva contraseña</label>
+            <label class="form-label fw-bold small" for="pass-nuevo">Nueva contraseña</label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-              <input type="password" class="form-control" [(ngModel)]="password.nuevo" placeholder="Mínimo 6 caracteres">
+              <input type="password" id="pass-nuevo" class="form-control" [(ngModel)]="password.nuevo" placeholder="Mínimo 6 caracteres">
             </div>
           </div>
 
           <div class="mb-4">
-            <label class="form-label fw-bold small">Confirmar nueva contraseña</label>
+            <label class="form-label fw-bold small" for="pass-confirmar">Confirmar nueva contraseña</label>
             <div class="input-group">
               <span class="input-group-text bg-light"><i class="bi bi-lock-fill"></i></span>
-              <input type="password" class="form-control" [(ngModel)]="password.confirmar" placeholder="Repite la nueva contraseña">
+              <input type="password" id="pass-confirmar" class="form-control" [(ngModel)]="password.confirmar" placeholder="Repite la nueva contraseña">
             </div>
           </div>
 
